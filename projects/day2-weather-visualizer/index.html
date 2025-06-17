@@ -114,17 +114,21 @@
         }
         
         .control-group label {
-            font-weight: 500;
+            font-weight: 600;
             margin-bottom: 0.5rem;
-            color: #2d3436;
+            color: #1f2937;
+            font-size: 1rem;
         }
         
         select {
             padding: 0.75rem;
-            border: 2px solid #ddd;
+            border: 2px solid #9ca3af;
             border-radius: 8px;
             font-size: 1rem;
             transition: border-color 0.3s ease;
+            color: #1f2937;
+            font-weight: 500;
+            background-color: #ffffff;
         }
         
         select:focus {
@@ -241,7 +245,7 @@
     <div class="container">
         <div class="header">
             <h1>🌦️ Weather Data Visualizer</h1>
-            <p>Real-time weather simulation with interactive charts and controls</p>
+            <p>Live weather data from around the world with interactive charts and controls</p>
         </div>
         
         <!-- Current Weather Display -->
@@ -291,11 +295,8 @@
                 </div>
             </div>
             <div class="button-group">
-                <button id="data-mode-btn" class="btn-primary">
-                    🌐 Use Real Weather Data
-                </button>
-                <button id="simulate-btn" class="btn-primary">
-                    🌦️ Simulate Weather
+                <button id="refresh-btn" class="btn-primary">
+                    🔄 Refresh Weather Data
                 </button>
                 <button id="auto-update-btn" class="btn-success">
                     <span class="status-indicator status-inactive"></span>Auto Update
@@ -331,7 +332,7 @@
         let isAutoUpdating = false;
         let autoUpdateInterval;
         let weatherData = [];
-        let useRealData = false;
+        let useRealData = true; // Always use real data
         
         // WeatherAPI.com configuration
         // 🔑 To use real weather data:
@@ -867,100 +868,41 @@
         }
         
         // Event listeners
-        document.getElementById('data-mode-btn').addEventListener('click', async (e) => {
-            useRealData = !useRealData;
-            
-            if (useRealData) {
-                e.target.innerHTML = '🌦️ Use Simulated Data';
-                e.target.className = 'btn-success';
-                
-                // Try to fetch real weather data
-                const location = document.getElementById('location-select').value;
-                const period = parseInt(document.getElementById('period-select').value);
-                
-                const realWeather = await fetchCurrentWeather(location);
-                if (realWeather) {
-                    currentWeather = realWeather;
-                    updateCurrentWeatherDisplay();
-                    
-                    const historicalData = await fetchHistoricalWeather(location, period);
-                    if (historicalData) {
-                        weatherData = historicalData;
-                        createTemperatureChart(weatherData);
-                        createPrecipitationChart(weatherData);
-                    }
-                } else {
-                    // Fallback to simulated data
-                    useRealData = false;
-                    e.target.innerHTML = '🌐 Use Real Weather Data';
-                    e.target.className = 'btn-primary';
-                }
-            } else {
-                e.target.innerHTML = '🌐 Use Real Weather Data';
-                e.target.className = 'btn-primary';
-                
-                // Switch back to simulated data
-                const location = document.getElementById('location-select').value;
-                const period = parseInt(document.getElementById('period-select').value);
-                
-                const locationInfo = locationData[location];
-                currentWeather = { ...locationInfo };
-                weatherData = generateWeatherData(period, location);
-                createTemperatureChart(weatherData);
-                createPrecipitationChart(weatherData);
-                updateCurrentWeatherDisplay();
-            }
-        });
-
-        document.getElementById('simulate-btn').addEventListener('click', async () => {
+        document.getElementById('refresh-btn').addEventListener('click', async () => {
             const location = document.getElementById('location-select').value;
             const period = parseInt(document.getElementById('period-select').value);
             
-            if (useRealData) {
-                // Fetch fresh real data
-                const realWeather = await fetchCurrentWeather(location);
-                if (realWeather) {
-                    currentWeather = realWeather;
-                    updateCurrentWeatherDisplay();
-                    
-                    const historicalData = await fetchHistoricalWeather(location, period);
-                    if (historicalData) {
-                        weatherData = historicalData;
-                        createTemperatureChart(weatherData);
-                        createPrecipitationChart(weatherData);
-                    }
+            // Fetch fresh real weather data
+            const realWeather = await fetchCurrentWeather(location);
+            if (realWeather) {
+                currentWeather = realWeather;
+                updateCurrentWeatherDisplay();
+                
+                const historicalData = await fetchHistoricalWeather(location, period);
+                if (historicalData) {
+                    weatherData = historicalData;
+                    createTemperatureChart(weatherData);
+                    createPrecipitationChart(weatherData);
                 }
-            } else {
-                // Generate new simulated data
-                weatherData = generateWeatherData(period, location);
-                createTemperatureChart(weatherData);
-                createPrecipitationChart(weatherData);
-                updateCurrentWeather();
             }
         });
         
         document.getElementById('auto-update-btn').addEventListener('click', (e) => {
             isAutoUpdating = !isAutoUpdating;
-            const indicator = e.target.querySelector('.status-indicator');
             
             if (isAutoUpdating) {
                 e.target.innerHTML = '<span class="status-indicator status-active"></span>Stop Auto Update';
                 e.target.className = 'btn-danger';
                 
                 autoUpdateInterval = setInterval(async () => {
-                    if (useRealData) {
-                        // Fetch fresh real weather data
-                        const location = document.getElementById('location-select').value;
-                        const realWeather = await fetchCurrentWeather(location);
-                        if (realWeather) {
-                            currentWeather = realWeather;
-                            updateCurrentWeatherDisplay();
-                        }
-                    } else {
-                        // Update simulated weather
-                        updateCurrentWeather();
+                    // Fetch fresh real weather data
+                    const location = document.getElementById('location-select').value;
+                    const realWeather = await fetchCurrentWeather(location);
+                    if (realWeather) {
+                        currentWeather = realWeather;
+                        updateCurrentWeatherDisplay();
                     }
-                }, 3000);
+                }, 5000); // Update every 5 seconds
             } else {
                 e.target.innerHTML = '<span class="status-indicator status-inactive"></span>Auto Update';
                 e.target.className = 'btn-success';
@@ -977,29 +919,18 @@
             const location = e.target.value;
             const period = parseInt(document.getElementById('period-select').value);
             
-            if (useRealData) {
-                // Fetch real weather data for new location
-                const realWeather = await fetchCurrentWeather(location);
-                if (realWeather) {
-                    currentWeather = realWeather;
-                    updateCurrentWeatherDisplay();
-                    
-                    const historicalData = await fetchHistoricalWeather(location, period);
-                    if (historicalData) {
-                        weatherData = historicalData;
-                        createTemperatureChart(weatherData);
-                        createPrecipitationChart(weatherData);
-                    }
-                }
-            } else {
-                // Use simulated data
-                const locationInfo = locationData[location];
-                currentWeather = { ...locationInfo };
+            // Fetch real weather data for new location
+            const realWeather = await fetchCurrentWeather(location);
+            if (realWeather) {
+                currentWeather = realWeather;
                 updateCurrentWeatherDisplay();
                 
-                weatherData = generateWeatherData(period, location);
-                createTemperatureChart(weatherData);
-                createPrecipitationChart(weatherData);
+                const historicalData = await fetchHistoricalWeather(location, period);
+                if (historicalData) {
+                    weatherData = historicalData;
+                    createTemperatureChart(weatherData);
+                    createPrecipitationChart(weatherData);
+                }
             }
         });
         
@@ -1007,17 +938,10 @@
             const location = document.getElementById('location-select').value;
             const period = parseInt(document.getElementById('period-select').value);
             
-            if (useRealData) {
-                // Fetch real historical data for new period
-                const historicalData = await fetchHistoricalWeather(location, period);
-                if (historicalData) {
-                    weatherData = historicalData;
-                    createTemperatureChart(weatherData);
-                    createPrecipitationChart(weatherData);
-                }
-            } else {
-                // Generate simulated data for new period
-                weatherData = generateWeatherData(period, location);
+            // Fetch real historical data for new period
+            const historicalData = await fetchHistoricalWeather(location, period);
+            if (historicalData) {
+                weatherData = historicalData;
                 createTemperatureChart(weatherData);
                 createPrecipitationChart(weatherData);
             }
@@ -1031,13 +955,27 @@
             }
         });
         
-        // Initialize
-        const initialLocation = 'london';
-        currentWeather = { ...locationData[initialLocation] };
-        weatherData = generateWeatherData(7, initialLocation);
-        createTemperatureChart(weatherData);
-        createPrecipitationChart(weatherData);
-        updateCurrentWeatherDisplay();
+        // Initialize with real weather data
+        async function initialize() {
+            const initialLocation = 'london';
+            
+            // Fetch real weather data on load
+            const realWeather = await fetchCurrentWeather(initialLocation);
+            if (realWeather) {
+                currentWeather = realWeather;
+                updateCurrentWeatherDisplay();
+                
+                const historicalData = await fetchHistoricalWeather(initialLocation, 7);
+                if (historicalData) {
+                    weatherData = historicalData;
+                    createTemperatureChart(weatherData);
+                    createPrecipitationChart(weatherData);
+                }
+            }
+        }
+        
+        // Start the app
+        initialize();
     </script>
 </body>
 </html> 
