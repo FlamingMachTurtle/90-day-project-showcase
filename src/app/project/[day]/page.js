@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { formatDate, getRelativeTime } from '@/lib/utils';
@@ -12,33 +12,58 @@ export default function ProjectPage({ params }) {
   const [relatedProjects, setRelatedProjects] = useState([]);
   const [prevProject, setPrevProject] = useState(null);
   const [nextProject, setNextProject] = useState(null);
-
-  // Unwrap the async params
-  const resolvedParams = use(params);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const day = parseInt(resolvedParams.day);
-    const currentProject = projectsData.find(p => p.day === day);
+    const loadProject = async () => {
+      try {
+        // Unwrap the async params
+        const resolvedParams = await params;
+        const day = parseInt(resolvedParams.day);
+        const currentProject = projectsData.find(p => p.day === day);
+        
+        if (currentProject) {
+          setProject(currentProject);
+          
+          // Find related projects (same tags)
+          const related = projectsData
+            .filter(p => 
+              p.day !== day && 
+              p.tags.some(tag => currentProject.tags.includes(tag))
+            )
+            .slice(0, 3);
+          setRelatedProjects(related);
+          
+          // Find previous and next projects
+          const prev = projectsData.find(p => p.day === day - 1);
+          const next = projectsData.find(p => p.day === day + 1);
+          setPrevProject(prev);
+          setNextProject(next);
+        }
+        
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error loading project:', error);
+        setIsLoading(false);
+      }
+    };
     
-    if (currentProject) {
-      setProject(currentProject);
-      
-      // Find related projects (same tags)
-      const related = projectsData
-        .filter(p => 
-          p.day !== day && 
-          p.tags.some(tag => currentProject.tags.includes(tag))
-        )
-        .slice(0, 3);
-      setRelatedProjects(related);
-      
-      // Find previous and next projects
-      const prev = projectsData.find(p => p.day === day - 1);
-      const next = projectsData.find(p => p.day === day + 1);
-      setPrevProject(prev);
-      setNextProject(next);
-    }
-  }, [resolvedParams.day]);
+    loadProject();
+  }, [params]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-6xl mb-4">⏳</div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Loading Project...</h1>
+          <p className="text-gray-600 mb-6">
+            Please wait while we load the project details.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (!project) {
     return (
@@ -47,7 +72,7 @@ export default function ProjectPage({ params }) {
           <div className="text-6xl mb-4">🔍</div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Project Not Found</h1>
           <p className="text-gray-600 mb-6">
-            The project for day {resolvedParams.day} hasn't been created yet.
+            The requested project hasn't been created yet.
           </p>
           <Link 
             href="/"

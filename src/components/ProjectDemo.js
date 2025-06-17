@@ -35,6 +35,13 @@ const ProjectDemo = ({ project }) => {
         if (canvas && canvas.cleanup) {
           canvas.cleanup();
         }
+        
+        // Clean up weather visualizer
+        const weatherContainer = demoRef.current.querySelector('div');
+        if (weatherContainer && weatherContainer.cleanup) {
+          weatherContainer.cleanup();
+        }
+        
         // Clear the demo container
         demoRef.current.innerHTML = '';
       }
@@ -586,50 +593,594 @@ const ProjectDemo = ({ project }) => {
     });
   };
 
+  const loadWeatherVisualizer = async () => {
+    if (!demoRef.current) return;
+    
+    // Create main container
+    const container = document.createElement('div');
+    container.className = 'p-6 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-lg';
+    container.innerHTML = `
+      <div class="space-y-6">
+        <div class="text-center">
+          <h3 class="text-2xl font-bold text-gray-900 mb-2">Interactive Weather Data Visualizer</h3>
+          <p class="text-gray-600">Real-time weather simulation with interactive charts and controls</p>
+        </div>
+        
+        <!-- Current Weather Display -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div class="bg-white p-4 rounded-lg shadow-sm text-center">
+            <div id="temp-display" class="text-3xl font-bold text-blue-600">22°C</div>
+            <div class="text-sm text-gray-500">Temperature</div>
+          </div>
+          <div class="bg-white p-4 rounded-lg shadow-sm text-center">
+            <div id="humidity-display" class="text-3xl font-bold text-green-600">65%</div>
+            <div class="text-sm text-gray-500">Humidity</div>
+          </div>
+          <div class="bg-white p-4 rounded-lg shadow-sm text-center">
+            <div id="wind-display" class="text-3xl font-bold text-yellow-600">15km/h</div>
+            <div class="text-sm text-gray-500">Wind Speed</div>
+          </div>
+          <div class="bg-white p-4 rounded-lg shadow-sm text-center">
+            <div id="pressure-display" class="text-3xl font-bold text-purple-600">1013mb</div>
+            <div class="text-sm text-gray-500">Pressure</div>
+          </div>
+        </div>
+        
+        <!-- Interactive Controls -->
+        <div class="bg-white p-4 rounded-lg shadow-sm">
+          <h4 class="text-lg font-semibold mb-3">Weather Controls</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Location</label>
+              <select id="location-select" class="w-full p-2 border border-gray-300 rounded-md">
+                <option value="london">London, UK</option>
+                <option value="newyork">New York, USA</option>
+                <option value="tokyo">Tokyo, Japan</option>
+                <option value="sydney">Sydney, Australia</option>
+                <option value="paris">Paris, France</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Time Period</label>
+              <select id="period-select" class="w-full p-2 border border-gray-300 rounded-md">
+                <option value="7">7 Days</option>
+                <option value="14">14 Days</option>
+                <option value="30">30 Days</option>
+              </select>
+            </div>
+          </div>
+          <div class="mt-4">
+            <button id="data-mode-btn" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors mr-2">
+              🌐 Use Real Weather Data
+            </button>
+            <button id="simulate-btn" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors mr-2">
+              🌦️ Simulate Weather
+            </button>
+            <button id="auto-update-btn" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors">
+              ⚡ Auto Update
+            </button>
+          </div>
+        </div>
+        
+        <!-- Temperature Chart -->
+        <div class="bg-white p-4 rounded-lg shadow-sm">
+          <h4 class="text-lg font-semibold mb-3">Temperature Trend</h4>
+          <div id="temp-chart" class="w-full h-64"></div>
+        </div>
+        
+        <!-- Precipitation Chart -->
+        <div class="bg-white p-4 rounded-lg shadow-sm">
+          <h4 class="text-lg font-semibold mb-3">Precipitation & Humidity</h4>
+          <div id="precip-chart" class="w-full h-48"></div>
+        </div>
+      </div>
+    `;
+    
+    demoRef.current.appendChild(container);
+    
+        // Weather data simulation
+    let currentWeather = {
+      temp: 22,
+      humidity: 65,
+      windSpeed: 15,
+      pressure: 1013
+    };
+
+    let isAutoUpdating = false;
+    let autoUpdateInterval;
+    let useRealData = false;
+    
+    // OpenWeatherMap API configuration
+            const API_KEY = '0151008a4defe17a6b4f974e7ee8e388';
+    const API_BASE_URL = 'https://api.openweathermap.org/data/2.5';
+    
+    // Location data with coordinates
+    const locationData = {
+      london: { temp: 15, humidity: 75, windSpeed: 12, pressure: 1015, lat: 51.5074, lon: -0.1278, name: 'London' },
+      newyork: { temp: 18, humidity: 60, windSpeed: 15, pressure: 1012, lat: 40.7128, lon: -74.0060, name: 'New York' },
+      tokyo: { temp: 25, humidity: 70, windSpeed: 8, pressure: 1018, lat: 35.6762, lon: 139.6503, name: 'Tokyo' },
+      sydney: { temp: 22, humidity: 55, windSpeed: 20, pressure: 1020, lat: -33.8688, lon: 151.2093, name: 'Sydney' },
+      paris: { temp: 16, humidity: 65, windSpeed: 10, pressure: 1014, lat: 48.8566, lon: 2.3522, name: 'Paris' }
+    };
+    
+    // Real weather API functions
+    async function fetchCurrentWeather(location) {
+              if (!API_KEY || API_KEY === 'demo_key') {
+          showApiKeyWarning();
+          return null;
+        }
+      
+      try {
+        const locationInfo = locationData[location];
+        const response = await fetch(
+          `${API_BASE_URL}/weather?lat=${locationInfo.lat}&lon=${locationInfo.lon}&appid=${API_KEY}&units=metric`
+        );
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        return {
+          temp: Math.round(data.main.temp),
+          humidity: data.main.humidity,
+          windSpeed: Math.round(data.wind.speed * 3.6), // Convert m/s to km/h
+          pressure: data.main.pressure
+        };
+      } catch (error) {
+        console.error('Error fetching current weather:', error);
+        console.error('API URL:', `${API_BASE_URL}/weather?lat=${locationInfo.lat}&lon=${locationInfo.lon}&appid=${API_KEY}&units=metric`);
+        
+        if (error.message.includes('401')) {
+          showError('API Key Error (401): Please check if your API key is valid and activated. It can take up to 2 hours for new keys to activate.');
+        } else if (error.message.includes('429')) {
+          showError('Rate Limit Error (429): Too many API calls. Please wait a moment and try again.');
+        } else {
+          showError(`Failed to fetch current weather data: ${error.message}. Using simulated data.`);
+        }
+        return null;
+      }
+    }
+    
+    function showApiKeyWarning() {
+      const warning = document.createElement('div');
+      warning.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #fef3c7;
+        border: 2px solid #f59e0b;
+        color: #92400e;
+        padding: 15px;
+        border-radius: 10px;
+        max-width: 350px;
+        z-index: 1000;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      `;
+      warning.innerHTML = `
+        <strong>⚠️ Invalid API Key</strong><br>
+        The current API key is invalid. To use real weather data:<br>
+        1. Sign up at <a href="https://openweathermap.org/api" target="_blank">OpenWeatherMap</a><br>
+        2. Get your API key from your account dashboard<br>
+        3. Wait up to 2 hours for activation<br>
+        4. Replace the API key in the code<br>
+        <small>Note: Free plan has 60 calls/minute limit</small><br>
+        <button onclick="this.parentElement.remove()" style="margin-top: 10px; padding: 5px 10px; border: none; background: #f59e0b; color: white; border-radius: 5px; cursor: pointer;">Close</button>
+      `;
+      document.body.appendChild(warning);
+      
+      setTimeout(() => {
+        if (warning.parentElement) {
+          warning.remove();
+        }
+      }, 15000);
+    }
+    
+    function showError(message) {
+      const error = document.createElement('div');
+      error.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #fef2f2;
+        border: 2px solid #ef4444;
+        color: #dc2626;
+        padding: 15px;
+        border-radius: 10px;
+        max-width: 300px;
+        z-index: 1000;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      `;
+      error.innerHTML = `
+        <strong>❌ Error</strong><br>
+        ${message}<br>
+        <button onclick="this.parentElement.remove()" style="margin-top: 10px; padding: 5px 10px; border: none; background: #ef4444; color: white; border-radius: 5px; cursor: pointer;">Close</button>
+      `;
+      document.body.appendChild(error);
+      
+      setTimeout(() => {
+        if (error.parentElement) {
+          error.remove();
+        }
+      }, 6000);
+    }
+    
+    // Generate sample weather data
+    function generateWeatherData(days = 7) {
+      const data = [];
+      const now = new Date();
+      
+      for (let i = 0; i < days; i++) {
+        const date = new Date(now);
+        date.setDate(date.getDate() - (days - 1 - i));
+        
+        // Simulate seasonal temperature variation
+        const baseTemp = 20 + Math.sin((date.getMonth() / 12) * Math.PI * 2) * 10;
+        const dailyVariation = Math.random() * 10 - 5;
+        const temp = Math.round(baseTemp + dailyVariation);
+        
+        data.push({
+          date: date,
+          temp: temp,
+          humidity: Math.round(40 + Math.random() * 40),
+          precipitation: Math.random() * 20,
+          windSpeed: Math.round(5 + Math.random() * 25),
+          pressure: Math.round(990 + Math.random() * 40)
+        });
+      }
+      
+      return data;
+    }
+    
+    // Create interactive charts using canvas
+    function createTemperatureChart(data) {
+      const chartContainer = document.getElementById('temp-chart');
+      chartContainer.innerHTML = '';
+      
+      const canvas = document.createElement('canvas');
+      canvas.width = chartContainer.clientWidth;
+      canvas.height = 256;
+      canvas.style.width = '100%';
+      canvas.style.height = '256px';
+      
+      const ctx = canvas.getContext('2d');
+      
+      // Chart dimensions
+      const padding = 40;
+      const chartWidth = canvas.width - padding * 2;
+      const chartHeight = canvas.height - padding * 2;
+      
+      // Find min/max temperatures
+      const temps = data.map(d => d.temp);
+      const minTemp = Math.min(...temps) - 2;
+      const maxTemp = Math.max(...temps) + 2;
+      
+      // Clear canvas
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw grid
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 1;
+      
+      // Horizontal grid lines
+      for (let i = 0; i <= 5; i++) {
+        const y = padding + (chartHeight / 5) * i;
+        ctx.beginPath();
+        ctx.moveTo(padding, y);
+        ctx.lineTo(canvas.width - padding, y);
+        ctx.stroke();
+        
+        // Temperature labels
+        const temp = Math.round(maxTemp - (maxTemp - minTemp) * (i / 5));
+        ctx.fillStyle = '#64748b';
+        ctx.font = '12px sans-serif';
+        ctx.textAlign = 'right';
+        ctx.fillText(temp + '°C', padding - 10, y + 4);
+      }
+      
+      // Draw temperature line
+      ctx.strokeStyle = '#3b82f6';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      
+      data.forEach((point, index) => {
+        const x = padding + (chartWidth / (data.length - 1)) * index;
+        const y = padding + chartHeight - ((point.temp - minTemp) / (maxTemp - minTemp)) * chartHeight;
+        
+        if (index === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+      });
+      
+      ctx.stroke();
+      
+      // Draw data points
+      data.forEach((point, index) => {
+        const x = padding + (chartWidth / (data.length - 1)) * index;
+        const y = padding + chartHeight - ((point.temp - minTemp) / (maxTemp - minTemp)) * chartHeight;
+        
+        ctx.fillStyle = '#3b82f6';
+        ctx.beginPath();
+        ctx.arc(x, y, 4, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Date labels
+        ctx.fillStyle = '#64748b';
+        ctx.font = '10px sans-serif';
+        ctx.textAlign = 'center';
+        const dateStr = point.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        ctx.fillText(dateStr, x, canvas.height - 10);
+      });
+      
+      chartContainer.appendChild(canvas);
+      
+      // Add hover interaction
+      canvas.addEventListener('mousemove', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+        
+        // Find closest data point
+        let closestIndex = 0;
+        let closestDistance = Infinity;
+        
+        data.forEach((point, index) => {
+          const x = (padding + (chartWidth / (data.length - 1)) * index) * (canvas.width / rect.width);
+          const distance = Math.abs(mouseX * (canvas.width / rect.width) - x);
+          
+          if (distance < closestDistance) {
+            closestDistance = distance;
+            closestIndex = index;
+          }
+        });
+        
+        // Show tooltip
+        canvas.title = `${data[closestIndex].date.toLocaleDateString()}: ${data[closestIndex].temp}°C`;
+      });
+    }
+    
+    function createPrecipitationChart(data) {
+      const chartContainer = document.getElementById('precip-chart');
+      chartContainer.innerHTML = '';
+      
+      const canvas = document.createElement('canvas');
+      canvas.width = chartContainer.clientWidth;
+      canvas.height = 192;
+      canvas.style.width = '100%';
+      canvas.style.height = '192px';
+      
+      const ctx = canvas.getContext('2d');
+      
+      // Chart dimensions
+      const padding = 40;
+      const chartWidth = canvas.width - padding * 2;
+      const chartHeight = canvas.height - padding * 2;
+      
+      // Clear canvas
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw precipitation bars
+      const barWidth = chartWidth / data.length * 0.6;
+      
+      data.forEach((point, index) => {
+        const x = padding + (chartWidth / data.length) * index + (chartWidth / data.length - barWidth) / 2;
+        const barHeight = (point.precipitation / 20) * chartHeight * 0.7;
+        const y = padding + chartHeight - barHeight;
+        
+        // Precipitation bar
+        ctx.fillStyle = '#06b6d4';
+        ctx.fillRect(x, y, barWidth, barHeight);
+        
+        // Humidity line point
+        const humidityY = padding + chartHeight - (point.humidity / 100) * chartHeight * 0.3;
+        ctx.fillStyle = '#10b981';
+        ctx.beginPath();
+        ctx.arc(x + barWidth / 2, humidityY, 3, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      
+      // Legend
+      ctx.fillStyle = '#64748b';
+      ctx.font = '12px sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText('📊 Precipitation (mm)', padding, 20);
+      ctx.fillText('💧 Humidity (%)', padding + 150, 20);
+      
+      // Add Y-axis labels
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 1;
+      
+      for (let i = 0; i <= 4; i++) {
+        const y = padding + (chartHeight / 4) * i;
+        ctx.beginPath();
+        ctx.moveTo(padding, y);
+        ctx.lineTo(canvas.width - padding, y);
+        ctx.stroke();
+        
+        // Left Y-axis labels (Precipitation)
+        const precipValue = Math.round(20 - (20 * i / 4));
+        ctx.fillStyle = '#06b6d4';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'right';
+        ctx.fillText(precipValue + 'mm', padding - 10, y + 4);
+        
+        // Right Y-axis labels (Humidity)
+        const humidityValue = Math.round(100 - (100 * i / 4));
+        ctx.fillStyle = '#10b981';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText(humidityValue + '%', canvas.width - padding + 10, y + 4);
+      }
+      
+      chartContainer.appendChild(canvas);
+    }
+    
+    function updateCurrentWeather() {
+      // Simulate realistic weather changes
+      currentWeather.temp += (Math.random() - 0.5) * 2;
+      currentWeather.temp = Math.max(-10, Math.min(40, currentWeather.temp));
+      
+      currentWeather.humidity += (Math.random() - 0.5) * 5;
+      currentWeather.humidity = Math.max(20, Math.min(100, currentWeather.humidity));
+      
+      currentWeather.windSpeed += (Math.random() - 0.5) * 3;
+      currentWeather.windSpeed = Math.max(0, Math.min(50, currentWeather.windSpeed));
+      
+      currentWeather.pressure += (Math.random() - 0.5) * 2;
+      currentWeather.pressure = Math.max(980, Math.min(1040, currentWeather.pressure));
+      
+      // Update displays
+      document.getElementById('temp-display').textContent = Math.round(currentWeather.temp) + '°C';
+      document.getElementById('humidity-display').textContent = Math.round(currentWeather.humidity) + '%';
+      document.getElementById('wind-display').textContent = Math.round(currentWeather.windSpeed) + 'km/h';
+      document.getElementById('pressure-display').textContent = Math.round(currentWeather.pressure) + 'mb';
+    }
+    
+    // Initial chart creation
+    let weatherData = generateWeatherData(7);
+    createTemperatureChart(weatherData);
+    createPrecipitationChart(weatherData);
+    
+    // Event listeners
+    document.getElementById('data-mode-btn').addEventListener('click', async (e) => {
+      useRealData = !useRealData;
+      
+      if (useRealData) {
+        e.target.innerHTML = '🌦️ Use Simulated Data';
+        e.target.className = 'bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors mr-2';
+        
+        // Try to fetch real weather data
+        const location = document.getElementById('location-select').value;
+        const realWeather = await fetchCurrentWeather(location);
+        if (realWeather) {
+          currentWeather = realWeather;
+          updateCurrentWeather();
+        } else {
+          // Fallback to simulated data
+          useRealData = false;
+          e.target.innerHTML = '🌐 Use Real Weather Data';
+          e.target.className = 'bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors mr-2';
+        }
+      } else {
+        e.target.innerHTML = '🌐 Use Real Weather Data';
+        e.target.className = 'bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors mr-2';
+        
+        // Switch back to simulated data
+        const location = document.getElementById('location-select').value;
+        const locationInfo = locationData[location];
+        currentWeather = { ...locationInfo };
+        updateCurrentWeather();
+      }
+    });
+
+    document.getElementById('simulate-btn').addEventListener('click', async () => {
+      if (useRealData) {
+        // Fetch fresh real data
+        const location = document.getElementById('location-select').value;
+        const realWeather = await fetchCurrentWeather(location);
+        if (realWeather) {
+          currentWeather = realWeather;
+          updateCurrentWeather();
+        }
+      } else {
+        // Generate new simulated data
+        const period = parseInt(document.getElementById('period-select').value);
+        weatherData = generateWeatherData(period);
+        createTemperatureChart(weatherData);
+        createPrecipitationChart(weatherData);
+        updateCurrentWeather();
+      }
+    });
+    
+    document.getElementById('auto-update-btn').addEventListener('click', (e) => {
+      isAutoUpdating = !isAutoUpdating;
+      
+      if (isAutoUpdating) {
+        e.target.textContent = '⏸️ Stop Auto Update';
+        e.target.className = 'bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors';
+        
+        autoUpdateInterval = setInterval(async () => {
+          if (useRealData) {
+            // Fetch fresh real weather data
+            const location = document.getElementById('location-select').value;
+            const realWeather = await fetchCurrentWeather(location);
+            if (realWeather) {
+              currentWeather = realWeather;
+              updateCurrentWeather();
+            }
+          } else {
+            // Update simulated weather
+            updateCurrentWeather();
+          }
+        }, 2000);
+      } else {
+        e.target.textContent = '⚡ Auto Update';
+        e.target.className = 'bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors';
+        
+        if (autoUpdateInterval) {
+          clearInterval(autoUpdateInterval);
+        }
+      }
+    });
+    
+    document.getElementById('location-select').addEventListener('change', async (e) => {
+      const location = e.target.value;
+      
+      if (useRealData) {
+        // Fetch real weather data for new location
+        const realWeather = await fetchCurrentWeather(location);
+        if (realWeather) {
+          currentWeather = realWeather;
+          updateCurrentWeather();
+        }
+      } else {
+        // Use simulated data
+        const locationInfo = locationData[location];
+        currentWeather = { ...locationInfo };
+        updateCurrentWeather();
+        
+        const period = parseInt(document.getElementById('period-select').value);
+        weatherData = generateWeatherData(period);
+        createTemperatureChart(weatherData);
+        createPrecipitationChart(weatherData);
+      }
+    });
+    
+    document.getElementById('period-select').addEventListener('change', () => {
+      const period = parseInt(document.getElementById('period-select').value);
+      weatherData = generateWeatherData(period);
+      createTemperatureChart(weatherData);
+      createPrecipitationChart(weatherData);
+    });
+    
+    // Cleanup function for auto-update
+    const cleanup = () => {
+      if (autoUpdateInterval) {
+        clearInterval(autoUpdateInterval);
+      }
+    };
+    
+    // Store cleanup function for later use
+    container.cleanup = cleanup;
+  };
+
   const loadReactDemo = async () => {
     setDemoType('react');
     
     if (!demoRef.current) return;
     
-    // Create a simple interactive React-style demo
-    const demoContainer = document.createElement('div');
-    demoContainer.className = 'p-6 bg-gray-50 rounded-lg';
-    
     if (project.day === 2) {
-      // Weather Data Visualizer example
-      demoContainer.innerHTML = `
-        <div class="space-y-4">
-          <h3 class="text-lg font-semibold text-gray-900">Weather Data Visualizer</h3>
-          <div class="grid grid-cols-3 gap-4">
-            <div class="bg-blue-100 p-4 rounded-lg text-center">
-              <div class="text-2xl font-bold text-blue-600">22°C</div>
-              <div class="text-sm text-blue-500">Temperature</div>
-            </div>
-            <div class="bg-green-100 p-4 rounded-lg text-center">
-              <div class="text-2xl font-bold text-green-600">65%</div>
-              <div class="text-sm text-green-500">Humidity</div>
-            </div>
-            <div class="bg-yellow-100 p-4 rounded-lg text-center">
-              <div class="text-2xl font-bold text-yellow-600">15km/h</div>
-              <div class="text-sm text-yellow-500">Wind Speed</div>
-            </div>
-          </div>
-          <div class="mt-4">
-            <div class="text-sm text-gray-600 mb-2">Temperature Trend (7 days)</div>
-            <div class="h-20 bg-gradient-to-r from-blue-200 via-green-200 to-yellow-200 rounded-lg flex items-end justify-around p-2">
-              <div class="bg-blue-500 w-4 h-8 rounded-t"></div>
-              <div class="bg-blue-400 w-4 h-12 rounded-t"></div>
-              <div class="bg-green-400 w-4 h-16 rounded-t"></div>
-              <div class="bg-green-500 w-4 h-14 rounded-t"></div>
-              <div class="bg-yellow-400 w-4 h-18 rounded-t"></div>
-              <div class="bg-yellow-500 w-4 h-16 rounded-t"></div>
-              <div class="bg-orange-400 w-4 h-12 rounded-t"></div>
-            </div>
-          </div>
-        </div>
-      `;
+      // Weather Data Visualizer - Interactive implementation
+      await loadWeatherVisualizer();
     } else {
       // Generic interactive demo
+      const demoContainer = document.createElement('div');
+      demoContainer.className = 'p-6 bg-gray-50 rounded-lg';
+      
       demoContainer.innerHTML = `
         <div class="text-center space-y-4">
           <h3 class="text-lg font-semibold text-gray-900">${project.title}</h3>
@@ -649,9 +1200,9 @@ const ProjectDemo = ({ project }) => {
           button.className = 'bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors';
         }, 2000);
       });
+      
+      demoRef.current.appendChild(demoContainer);
     }
-    
-    demoRef.current.appendChild(demoContainer);
   };
 
   if (!project || !project.liveDemo) {

@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Data Visualizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            min-height: 100vh;
+            padding: 2rem;
+            color: #2d3436;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .header p {
+            color: #636e72;
+            font-size: 1.1rem;
+        }
+        
+        .weather-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .weather-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .weather-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .weather-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .weather-label {
+            font-size: 0.9rem;
+            color: #636e72;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .temp { color: #3b82f6; }
+        .humidity { color: #10b981; }
+        .wind { color: #f59e0b; }
+        .pressure { color: #8b5cf6; }
+        
+        .controls {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .controls h3 {
+            margin-bottom: 1rem;
+            color: #2d3436;
+        }
+        
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .control-group label {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #2d3436;
+        }
+        
+        select {
+            padding: 0.75rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        select:focus {
+            outline: none;
+            border-color: #74b9ff;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            color: white;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #00b894, #00a085);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #e17055, #d63031);
+            color: white;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .chart-container {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .chart-container h3 {
+            margin-bottom: 1rem;
+            color: #2d3436;
+        }
+        
+        .chart {
+            width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+        
+        .status-active {
+            background: #00b894;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-inactive {
+            background: #636e72;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .weather-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .control-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌦️ Weather Data Visualizer</h1>
+            <p>Real-time weather simulation with interactive charts and controls</p>
+        </div>
+        
+        <!-- Current Weather Display -->
+        <div class="weather-cards">
+            <div class="weather-card">
+                <div id="temp-display" class="weather-value temp">22°C</div>
+                <div class="weather-label">Temperature</div>
+            </div>
+            <div class="weather-card">
+                <div id="humidity-display" class="weather-value humidity">65%</div>
+                <div class="weather-label">Humidity</div>
+            </div>
+            <div class="weather-card">
+                <div id="wind-display" class="weather-value wind">15km/h</div>
+                <div class="weather-label">Wind Speed</div>
+            </div>
+            <div class="weather-card">
+                <div id="pressure-display" class="weather-value pressure">1013mb</div>
+                <div class="weather-label">Pressure</div>
+            </div>
+        </div>
+        
+        <!-- Interactive Controls -->
+        <div class="controls">
+            <h3>Weather Controls</h3>
+            <div class="control-grid">
+                <div class="control-group">
+                    <label for="location-select">Location</label>
+                    <select id="location-select">
+                        <option value="london">London, UK</option>
+                        <option value="newyork">New York, USA</option>
+                        <option value="tokyo">Tokyo, Japan</option>
+                        <option value="sydney">Sydney, Australia</option>
+                        <option value="paris">Paris, France</option>
+                        <option value="moscow">Moscow, Russia</option>
+                        <option value="cairo">Cairo, Egypt</option>
+                        <option value="mumbai">Mumbai, India</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="period-select">Time Period</label>
+                    <select id="period-select">
+                        <option value="7">7 Days</option>
+                        <option value="14">14 Days</option>
+                        <option value="30">30 Days</option>
+                    </select>
+                </div>
+            </div>
+            <div class="button-group">
+                <button id="data-mode-btn" class="btn-primary">
+                    🌐 Use Real Weather Data
+                </button>
+                <button id="simulate-btn" class="btn-primary">
+                    🌦️ Simulate Weather
+                </button>
+                <button id="auto-update-btn" class="btn-success">
+                    <span class="status-indicator status-inactive"></span>Auto Update
+                </button>
+                <button id="export-btn" class="btn-primary">
+                    📊 Export Data
+                </button>
+            </div>
+        </div>
+        
+        <!-- Temperature Chart -->
+        <div class="chart-container">
+            <h3>📈 Temperature Trend</h3>
+            <canvas id="temp-chart" class="chart"></canvas>
+        </div>
+        
+        <!-- Precipitation Chart -->
+        <div class="chart-container">
+            <h3>🌧️ Precipitation & Humidity</h3>
+            <canvas id="precip-chart" class="chart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // Weather data simulation
+        let currentWeather = {
+            temp: 22,
+            humidity: 65,
+            windSpeed: 15,
+            pressure: 1013
+        };
+        
+        let isAutoUpdating = false;
+        let autoUpdateInterval;
+        let weatherData = [];
+        let useRealData = false;
+        
+        // OpenWeatherMap API configuration
+        // 🔑 To use real weather data:
+        // 1. Sign up for free at https://openweathermap.org/api
+        // 2. Get your API key from your account dashboard
+        // 3. Replace 'demo_key' below with your actual API key
+        const API_KEY = '0151008a4defe17a6b4f974e7ee8e388';
+        const API_BASE_URL = 'https://api.openweathermap.org/data/2.5';
+        
+        // Location-specific weather patterns and coordinates
+        const locationData = {
+            london: { temp: 15, humidity: 75, windSpeed: 12, pressure: 1015, tempRange: [-5, 25], lat: 51.5074, lon: -0.1278, name: 'London' },
+            newyork: { temp: 18, humidity: 60, windSpeed: 15, pressure: 1012, tempRange: [-10, 35], lat: 40.7128, lon: -74.0060, name: 'New York' },
+            tokyo: { temp: 25, humidity: 70, windSpeed: 8, pressure: 1018, tempRange: [0, 40], lat: 35.6762, lon: 139.6503, name: 'Tokyo' },
+            sydney: { temp: 22, humidity: 55, windSpeed: 20, pressure: 1020, tempRange: [5, 45], lat: -33.8688, lon: 151.2093, name: 'Sydney' },
+            paris: { temp: 16, humidity: 65, windSpeed: 10, pressure: 1014, tempRange: [-5, 30], lat: 48.8566, lon: 2.3522, name: 'Paris' },
+            moscow: { temp: 5, humidity: 80, windSpeed: 18, pressure: 1010, tempRange: [-30, 30], lat: 55.7558, lon: 37.6176, name: 'Moscow' },
+            cairo: { temp: 35, humidity: 30, windSpeed: 8, pressure: 1016, tempRange: [10, 50], lat: 30.0444, lon: 31.2357, name: 'Cairo' },
+            mumbai: { temp: 30, humidity: 85, windSpeed: 12, pressure: 1008, tempRange: [15, 45], lat: 19.0760, lon: 72.8777, name: 'Mumbai' }
+        };
+        
+        // Real weather API functions
+        async function fetchCurrentWeather(location) {
+            if (!API_KEY || API_KEY === 'demo_key') {
+                showApiKeyWarning();
+                return null;
+            }
+            
+            try {
+                const locationInfo = locationData[location];
+                const response = await fetch(
+                    `${API_BASE_URL}/weather?lat=${locationInfo.lat}&lon=${locationInfo.lon}&appid=${API_KEY}&units=metric`
+                );
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                return {
+                    temp: Math.round(data.main.temp),
+                    humidity: data.main.humidity,
+                    windSpeed: Math.round(data.wind.speed * 3.6), // Convert m/s to km/h
+                    pressure: data.main.pressure,
+                    description: data.weather[0].description,
+                    icon: data.weather[0].icon
+                };
+            } catch (error) {
+                console.error('Error fetching current weather:', error);
+                console.error('API URL:', `${API_BASE_URL}/weather?lat=${locationInfo.lat}&lon=${locationInfo.lon}&appid=${API_KEY}&units=metric`);
+                
+                if (error.message.includes('401')) {
+                    showError('API Key Error (401): Please check if your API key is valid and activated. It can take up to 2 hours for new keys to activate.');
+                } else if (error.message.includes('429')) {
+                    showError('Rate Limit Error (429): Too many API calls. Please wait a moment and try again.');
+                } else {
+                    showError(`Failed to fetch current weather data: ${error.message}. Using simulated data.`);
+                }
+                return null;
+            }
+        }
+        
+        async function fetchHistoricalWeather(location, days = 7) {
+            if (!API_KEY || API_KEY === 'demo_key') {
+                showApiKeyWarning();
+                return null;
+            }
+            
+            try {
+                const locationInfo = locationData[location];
+                const historicalData = [];
+                
+                // Note: OpenWeatherMap's historical data requires a paid plan
+                // For demo purposes, we'll use current weather and create variations
+                const currentWeather = await fetchCurrentWeather(location);
+                if (!currentWeather) return null;
+                
+                const now = new Date();
+                for (let i = 0; i < days; i++) {
+                    const date = new Date(now);
+                    date.setDate(date.getDate() - (days - 1 - i));
+                    
+                    // Create realistic variations based on current weather
+                    const tempVariation = (Math.random() - 0.5) * 6;
+                    const humidityVariation = (Math.random() - 0.5) * 20;
+                    
+                    historicalData.push({
+                        date: date,
+                        temp: Math.round(currentWeather.temp + tempVariation),
+                        humidity: Math.max(20, Math.min(100, currentWeather.humidity + humidityVariation)),
+                        precipitation: Math.random() * 15,
+                        windSpeed: Math.max(0, currentWeather.windSpeed + (Math.random() - 0.5) * 10),
+                        pressure: Math.max(980, Math.min(1040, currentWeather.pressure + (Math.random() - 0.5) * 15))
+                    });
+                }
+                
+                return historicalData;
+            } catch (error) {
+                console.error('Error fetching historical weather:', error);
+                showError('Failed to fetch historical weather data. Using simulated data.');
+                return null;
+            }
+        }
+        
+        function showApiKeyWarning() {
+            const warning = document.createElement('div');
+            warning.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #fef3c7;
+                border: 2px solid #f59e0b;
+                color: #92400e;
+                padding: 15px;
+                border-radius: 10px;
+                max-width: 350px;
+                z-index: 1000;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            `;
+            warning.innerHTML = `
+                <strong>⚠️ Invalid API Key</strong><br>
+                The current API key is invalid. To use real weather data:<br>
+                1. Sign up at <a href="https://openweathermap.org/api" target="_blank">OpenWeatherMap</a><br>
+                2. Get your API key from your account dashboard<br>
+                3. Wait up to 2 hours for activation<br>
+                4. Replace the API key in the code<br>
+                <small>Note: Free plan has 60 calls/minute limit</small><br>
+                <button onclick="this.parentElement.remove()" style="margin-top: 10px; padding: 5px 10px; border: none; background: #f59e0b; color: white; border-radius: 5px; cursor: pointer;">Close</button>
+            `;
+            document.body.appendChild(warning);
+            
+            setTimeout(() => {
+                if (warning.parentElement) {
+                    warning.remove();
+                }
+            }, 15000);
+        }
+        
+        function showError(message) {
+            const error = document.createElement('div');
+            error.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #fef2f2;
+                border: 2px solid #ef4444;
+                color: #dc2626;
+                padding: 15px;
+                border-radius: 10px;
+                max-width: 300px;
+                z-index: 1000;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            `;
+            error.innerHTML = `
+                <strong>❌ Error</strong><br>
+                ${message}<br>
+                <button onclick="this.parentElement.remove()" style="margin-top: 10px; padding: 5px 10px; border: none; background: #ef4444; color: white; border-radius: 5px; cursor: pointer;">Close</button>
+            `;
+            document.body.appendChild(error);
+            
+            setTimeout(() => {
+                if (error.parentElement) {
+                    error.remove();
+                }
+            }, 8000);
+        }
+        
+        // Generate sample weather data
+        function generateWeatherData(days = 7, location = 'london') {
+            const data = [];
+            const now = new Date();
+            const locationInfo = locationData[location];
+            
+            for (let i = 0; i < days; i++) {
+                const date = new Date(now);
+                date.setDate(date.getDate() - (days - 1 - i));
+                
+                // Simulate seasonal temperature variation
+                const seasonalFactor = Math.sin((date.getMonth() / 12) * Math.PI * 2);
+                const baseTemp = locationInfo.temp + seasonalFactor * 8;
+                const dailyVariation = (Math.random() - 0.5) * 8;
+                let temp = Math.round(baseTemp + dailyVariation);
+                
+                // Clamp to location's temperature range
+                temp = Math.max(locationInfo.tempRange[0], Math.min(locationInfo.tempRange[1], temp));
+                
+                data.push({
+                    date: date,
+                    temp: temp,
+                    humidity: Math.round(Math.max(20, Math.min(100, locationInfo.humidity + (Math.random() - 0.5) * 30))),
+                    precipitation: Math.random() * 25,
+                    windSpeed: Math.round(Math.max(0, locationInfo.windSpeed + (Math.random() - 0.5) * 15)),
+                    pressure: Math.round(Math.max(980, Math.min(1040, locationInfo.pressure + (Math.random() - 0.5) * 20)))
+                });
+            }
+            
+            return data;
+        }
+        
+        // Create interactive charts using canvas
+        function createTemperatureChart(data) {
+            const canvas = document.getElementById('temp-chart');
+            const container = canvas.parentElement;
+            
+            // Set canvas size
+            canvas.width = container.clientWidth - 40;
+            canvas.height = 300;
+            canvas.style.width = (container.clientWidth - 40) + 'px';
+            canvas.style.height = '300px';
+            
+            const ctx = canvas.getContext('2d');
+            
+            // Chart dimensions
+            const padding = 50;
+            const chartWidth = canvas.width - padding * 2;
+            const chartHeight = canvas.height - padding * 2;
+            
+            // Find min/max temperatures
+            const temps = data.map(d => d.temp);
+            const minTemp = Math.min(...temps) - 3;
+            const maxTemp = Math.max(...temps) + 3;
+            
+            // Clear canvas
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#f8fafc');
+            gradient.addColorStop(1, '#e2e8f0');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw grid
+            ctx.strokeStyle = '#cbd5e0';
+            ctx.lineWidth = 1;
+            
+            // Horizontal grid lines
+            for (let i = 0; i <= 5; i++) {
+                const y = padding + (chartHeight / 5) * i;
+                ctx.beginPath();
+                ctx.moveTo(padding, y);
+                ctx.lineTo(canvas.width - padding, y);
+                ctx.stroke();
+                
+                // Temperature labels
+                const temp = Math.round(maxTemp - (maxTemp - minTemp) * (i / 5));
+                ctx.fillStyle = '#4a5568';
+                ctx.font = 'bold 12px sans-serif';
+                ctx.textAlign = 'right';
+                ctx.fillText(temp + '°C', padding - 10, y + 4);
+            }
+            
+            // Vertical grid lines
+            for (let i = 0; i < data.length; i++) {
+                const x = padding + (chartWidth / (data.length - 1)) * i;
+                ctx.beginPath();
+                ctx.moveTo(x, padding);
+                ctx.lineTo(x, canvas.height - padding);
+                ctx.stroke();
+            }
+            
+            // Draw temperature area
+            ctx.beginPath();
+            ctx.moveTo(padding, canvas.height - padding);
+            
+            data.forEach((point, index) => {
+                const x = padding + (chartWidth / (data.length - 1)) * index;
+                const y = padding + chartHeight - ((point.temp - minTemp) / (maxTemp - minTemp)) * chartHeight;
+                
+                if (index === 0) {
+                    ctx.lineTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            });
+            
+            ctx.lineTo(canvas.width - padding, canvas.height - padding);
+            ctx.closePath();
+            
+            const areaGradient = ctx.createLinearGradient(0, padding, 0, canvas.height - padding);
+            areaGradient.addColorStop(0, 'rgba(59, 130, 246, 0.3)');
+            areaGradient.addColorStop(1, 'rgba(59, 130, 246, 0.05)');
+            ctx.fillStyle = areaGradient;
+            ctx.fill();
+            
+            // Draw temperature line
+            ctx.strokeStyle = '#3b82f6';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            
+            data.forEach((point, index) => {
+                const x = padding + (chartWidth / (data.length - 1)) * index;
+                const y = padding + chartHeight - ((point.temp - minTemp) / (maxTemp - minTemp)) * chartHeight;
+                
+                if (index === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            });
+            
+            ctx.stroke();
+            
+            // Draw data points
+            data.forEach((point, index) => {
+                const x = padding + (chartWidth / (data.length - 1)) * index;
+                const y = padding + chartHeight - ((point.temp - minTemp) / (maxTemp - minTemp)) * chartHeight;
+                
+                // Outer circle
+                ctx.fillStyle = '#3b82f6';
+                ctx.beginPath();
+                ctx.arc(x, y, 6, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Inner circle
+                ctx.fillStyle = 'white';
+                ctx.beginPath();
+                ctx.arc(x, y, 3, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Date labels
+                ctx.fillStyle = '#4a5568';
+                ctx.font = '10px sans-serif';
+                ctx.textAlign = 'center';
+                const dateStr = point.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                ctx.fillText(dateStr, x, canvas.height - 10);
+            });
+            
+            // Add hover interaction
+            canvas.addEventListener('mousemove', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                
+                // Find closest data point
+                let closestIndex = 0;
+                let closestDistance = Infinity;
+                
+                data.forEach((point, index) => {
+                    const x = (padding + (chartWidth / (data.length - 1)) * index) * (canvas.width / rect.width);
+                    const distance = Math.abs(mouseX * (canvas.width / rect.width) - x);
+                    
+                    if (distance < closestDistance) {
+                        closestDistance = distance;
+                        closestIndex = index;
+                    }
+                });
+                
+                // Show tooltip
+                const point = data[closestIndex];
+                canvas.title = `${point.date.toLocaleDateString()}: ${point.temp}°C, ${point.humidity}% humidity, ${point.windSpeed}km/h wind`;
+            });
+        }
+        
+        function createPrecipitationChart(data) {
+            const canvas = document.getElementById('precip-chart');
+            const container = canvas.parentElement;
+            
+            // Set canvas size
+            canvas.width = container.clientWidth - 40;
+            canvas.height = 250;
+            canvas.style.width = (container.clientWidth - 40) + 'px';
+            canvas.style.height = '250px';
+            
+            const ctx = canvas.getContext('2d');
+            
+            // Chart dimensions
+            const padding = 50;
+            const chartWidth = canvas.width - padding * 2;
+            const chartHeight = canvas.height - padding * 2;
+            
+            // Clear canvas
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#f8fafc');
+            gradient.addColorStop(1, '#e2e8f0');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw precipitation bars
+            const barWidth = Math.max(10, chartWidth / data.length * 0.6);
+            
+            data.forEach((point, index) => {
+                const x = padding + (chartWidth / data.length) * index + (chartWidth / data.length - barWidth) / 2;
+                const barHeight = Math.max(2, (point.precipitation / 25) * chartHeight * 0.7);
+                const y = padding + chartHeight - barHeight;
+                
+                // Precipitation bar with gradient
+                const barGradient = ctx.createLinearGradient(0, y, 0, y + barHeight);
+                barGradient.addColorStop(0, '#06b6d4');
+                barGradient.addColorStop(1, '#0891b2');
+                
+                ctx.fillStyle = barGradient;
+                ctx.fillRect(x, y, barWidth, barHeight);
+                
+                // Humidity line point
+                const humidityY = padding + chartHeight - (point.humidity / 100) * chartHeight * 0.3;
+                
+                // Humidity point with glow
+                ctx.shadowColor = '#10b981';
+                ctx.shadowBlur = 10;
+                ctx.fillStyle = '#10b981';
+                ctx.beginPath();
+                ctx.arc(x + barWidth / 2, humidityY, 4, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.shadowBlur = 0;
+                
+                // Date labels
+                ctx.fillStyle = '#4a5568';
+                ctx.font = '9px sans-serif';
+                ctx.textAlign = 'center';
+                const dateStr = point.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                ctx.fillText(dateStr, x + barWidth / 2, canvas.height - 5);
+            });
+            
+            // Legend
+            ctx.fillStyle = '#4a5568';
+            ctx.font = 'bold 12px sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText('📊 Precipitation (mm)', padding, 20);
+            ctx.fillText('💧 Humidity (%)', padding + 200, 20);
+            
+            // Grid lines and Y-axis labels
+            ctx.strokeStyle = '#cbd5e0';
+            ctx.lineWidth = 1;
+            
+            for (let i = 0; i <= 4; i++) {
+                const y = padding + (chartHeight / 4) * i;
+                ctx.beginPath();
+                ctx.moveTo(padding, y);
+                ctx.lineTo(canvas.width - padding, y);
+                ctx.stroke();
+                
+                // Left Y-axis labels (Precipitation)
+                const precipValue = Math.round(25 - (25 * i / 4));
+                ctx.fillStyle = '#06b6d4';
+                ctx.font = 'bold 11px sans-serif';
+                ctx.textAlign = 'right';
+                ctx.fillText(precipValue + 'mm', padding - 10, y + 4);
+                
+                // Right Y-axis labels (Humidity)
+                const humidityValue = Math.round(100 - (100 * i / 4));
+                ctx.fillStyle = '#10b981';
+                ctx.font = 'bold 11px sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText(humidityValue + '%', canvas.width - padding + 10, y + 4);
+            }
+        }
+        
+        function updateCurrentWeather() {
+            // Simulate realistic weather changes
+            const variation = 0.5;
+            
+            currentWeather.temp += (Math.random() - 0.5) * variation * 2;
+            currentWeather.temp = Math.max(-20, Math.min(50, currentWeather.temp));
+            
+            currentWeather.humidity += (Math.random() - 0.5) * variation * 3;
+            currentWeather.humidity = Math.max(20, Math.min(100, currentWeather.humidity));
+            
+            currentWeather.windSpeed += (Math.random() - 0.5) * variation * 2;
+            currentWeather.windSpeed = Math.max(0, Math.min(60, currentWeather.windSpeed));
+            
+            currentWeather.pressure += (Math.random() - 0.5) * variation;
+            currentWeather.pressure = Math.max(980, Math.min(1040, currentWeather.pressure));
+            
+            updateCurrentWeatherDisplay();
+        }
+        
+        function updateCurrentWeatherDisplay() {
+            // Update displays with animation
+            animateValue('temp-display', Math.round(currentWeather.temp) + '°C');
+            animateValue('humidity-display', Math.round(currentWeather.humidity) + '%');
+            animateValue('wind-display', Math.round(currentWeather.windSpeed) + 'km/h');
+            animateValue('pressure-display', Math.round(currentWeather.pressure) + 'mb');
+        }
+        
+        function animateValue(elementId, newValue) {
+            const element = document.getElementById(elementId);
+            element.style.transform = 'scale(1.1)';
+            element.style.transition = 'transform 0.2s ease';
+            
+            setTimeout(() => {
+                element.textContent = newValue;
+                element.style.transform = 'scale(1)';
+            }, 100);
+        }
+        
+        function exportData() {
+            const dataToExport = {
+                currentWeather: currentWeather,
+                historicalData: weatherData,
+                location: document.getElementById('location-select').value,
+                period: document.getElementById('period-select').value,
+                exportDate: new Date().toISOString()
+            };
+            
+            const dataStr = JSON.stringify(dataToExport, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `weather-data-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        // Event listeners
+        document.getElementById('data-mode-btn').addEventListener('click', async (e) => {
+            useRealData = !useRealData;
+            
+            if (useRealData) {
+                e.target.innerHTML = '🌦️ Use Simulated Data';
+                e.target.className = 'btn-success';
+                
+                // Try to fetch real weather data
+                const location = document.getElementById('location-select').value;
+                const period = parseInt(document.getElementById('period-select').value);
+                
+                const realWeather = await fetchCurrentWeather(location);
+                if (realWeather) {
+                    currentWeather = realWeather;
+                    updateCurrentWeatherDisplay();
+                    
+                    const historicalData = await fetchHistoricalWeather(location, period);
+                    if (historicalData) {
+                        weatherData = historicalData;
+                        createTemperatureChart(weatherData);
+                        createPrecipitationChart(weatherData);
+                    }
+                } else {
+                    // Fallback to simulated data
+                    useRealData = false;
+                    e.target.innerHTML = '🌐 Use Real Weather Data';
+                    e.target.className = 'btn-primary';
+                }
+            } else {
+                e.target.innerHTML = '🌐 Use Real Weather Data';
+                e.target.className = 'btn-primary';
+                
+                // Switch back to simulated data
+                const location = document.getElementById('location-select').value;
+                const period = parseInt(document.getElementById('period-select').value);
+                
+                const locationInfo = locationData[location];
+                currentWeather = { ...locationInfo };
+                weatherData = generateWeatherData(period, location);
+                createTemperatureChart(weatherData);
+                createPrecipitationChart(weatherData);
+                updateCurrentWeatherDisplay();
+            }
+        });
+
+        document.getElementById('simulate-btn').addEventListener('click', async () => {
+            const location = document.getElementById('location-select').value;
+            const period = parseInt(document.getElementById('period-select').value);
+            
+            if (useRealData) {
+                // Fetch fresh real data
+                const realWeather = await fetchCurrentWeather(location);
+                if (realWeather) {
+                    currentWeather = realWeather;
+                    updateCurrentWeatherDisplay();
+                    
+                    const historicalData = await fetchHistoricalWeather(location, period);
+                    if (historicalData) {
+                        weatherData = historicalData;
+                        createTemperatureChart(weatherData);
+                        createPrecipitationChart(weatherData);
+                    }
+                }
+            } else {
+                // Generate new simulated data
+                weatherData = generateWeatherData(period, location);
+                createTemperatureChart(weatherData);
+                createPrecipitationChart(weatherData);
+                updateCurrentWeather();
+            }
+        });
+        
+        document.getElementById('auto-update-btn').addEventListener('click', (e) => {
+            isAutoUpdating = !isAutoUpdating;
+            const indicator = e.target.querySelector('.status-indicator');
+            
+            if (isAutoUpdating) {
+                e.target.innerHTML = '<span class="status-indicator status-active"></span>Stop Auto Update';
+                e.target.className = 'btn-danger';
+                
+                autoUpdateInterval = setInterval(async () => {
+                    if (useRealData) {
+                        // Fetch fresh real weather data
+                        const location = document.getElementById('location-select').value;
+                        const realWeather = await fetchCurrentWeather(location);
+                        if (realWeather) {
+                            currentWeather = realWeather;
+                            updateCurrentWeatherDisplay();
+                        }
+                    } else {
+                        // Update simulated weather
+                        updateCurrentWeather();
+                    }
+                }, 3000);
+            } else {
+                e.target.innerHTML = '<span class="status-indicator status-inactive"></span>Auto Update';
+                e.target.className = 'btn-success';
+                
+                if (autoUpdateInterval) {
+                    clearInterval(autoUpdateInterval);
+                }
+            }
+        });
+        
+        document.getElementById('export-btn').addEventListener('click', exportData);
+        
+        document.getElementById('location-select').addEventListener('change', async (e) => {
+            const location = e.target.value;
+            const period = parseInt(document.getElementById('period-select').value);
+            
+            if (useRealData) {
+                // Fetch real weather data for new location
+                const realWeather = await fetchCurrentWeather(location);
+                if (realWeather) {
+                    currentWeather = realWeather;
+                    updateCurrentWeatherDisplay();
+                    
+                    const historicalData = await fetchHistoricalWeather(location, period);
+                    if (historicalData) {
+                        weatherData = historicalData;
+                        createTemperatureChart(weatherData);
+                        createPrecipitationChart(weatherData);
+                    }
+                }
+            } else {
+                // Use simulated data
+                const locationInfo = locationData[location];
+                currentWeather = { ...locationInfo };
+                updateCurrentWeatherDisplay();
+                
+                weatherData = generateWeatherData(period, location);
+                createTemperatureChart(weatherData);
+                createPrecipitationChart(weatherData);
+            }
+        });
+        
+        document.getElementById('period-select').addEventListener('change', async () => {
+            const location = document.getElementById('location-select').value;
+            const period = parseInt(document.getElementById('period-select').value);
+            
+            if (useRealData) {
+                // Fetch real historical data for new period
+                const historicalData = await fetchHistoricalWeather(location, period);
+                if (historicalData) {
+                    weatherData = historicalData;
+                    createTemperatureChart(weatherData);
+                    createPrecipitationChart(weatherData);
+                }
+            } else {
+                // Generate simulated data for new period
+                weatherData = generateWeatherData(period, location);
+                createTemperatureChart(weatherData);
+                createPrecipitationChart(weatherData);
+            }
+        });
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (weatherData.length > 0) {
+                createTemperatureChart(weatherData);
+                createPrecipitationChart(weatherData);
+            }
+        });
+        
+        // Initialize
+        const initialLocation = 'london';
+        currentWeather = { ...locationData[initialLocation] };
+        weatherData = generateWeatherData(7, initialLocation);
+        createTemperatureChart(weatherData);
+        createPrecipitationChart(weatherData);
+        updateCurrentWeatherDisplay();
+    </script>
+</body>
+</html> 

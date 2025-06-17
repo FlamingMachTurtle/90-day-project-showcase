@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Particle Physics Sandbox</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 900px;
+            width: 90%;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 1rem;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .description {
+            text-align: center;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        #canvas {
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.8);
+            cursor: crosshair;
+        }
+        
+        .info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .footer {
+            margin-top: 2rem;
+            text-align: center;
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            button {
+                width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌌 Particle Physics Sandbox</h1>
+        <p class="description">
+            Interactive particle system with gravity simulation. Click to create particles and watch them interact!
+        </p>
+        
+        <div class="controls">
+            <button onclick="addParticles()">➕ Add Particles</button>
+            <button onclick="clearParticles()">🧹 Clear All</button>
+            <button onclick="toggleGravity()">🌍 Toggle Gravity</button>
+            <button onclick="toggleTrails()">✨ Toggle Trails</button>
+        </div>
+        
+        <canvas id="canvas" width="800" height="500"></canvas>
+        
+        <div class="info">
+            <span>Particles: <span id="particleCount">0</span></span>
+            <span>Gravity: <span id="gravityStatus">ON</span></span>
+            <span>Trails: <span id="trailsStatus">OFF</span></span>
+        </div>
+        
+        <div class="footer">
+            <p>🎮 Click anywhere on the canvas to create particles • Use controls to modify behavior</p>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Responsive canvas
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            const maxWidth = Math.min(800, container.clientWidth - 40);
+            canvas.width = maxWidth;
+            canvas.height = Math.min(500, maxWidth * 0.625);
+            canvas.style.width = maxWidth + 'px';
+            canvas.style.height = canvas.height + 'px';
+        }
+        
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        
+        // Particle system
+        let particles = [];
+        let gravity = true;
+        let trails = false;
+        
+        class Particle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.vx = (Math.random() - 0.5) * 8;
+                this.vy = (Math.random() - 0.5) * 8;
+                this.radius = Math.random() * 8 + 3;
+                this.mass = this.radius * 0.1;
+                this.color = `hsl(${Math.random() * 360}, 70%, 60%)`;
+                this.life = 1.0;
+                this.decay = Math.random() * 0.005 + 0.001;
+                this.trail = [];
+            }
+            
+            update() {
+                // Apply gravity
+                if (gravity) {
+                    this.vy += 0.2;
+                }
+                
+                // Update position
+                this.x += this.vx;
+                this.y += this.vy;
+                
+                // Bounce off walls
+                if (this.x - this.radius < 0 || this.x + this.radius > canvas.width) {
+                    this.vx *= -0.8;
+                    this.x = Math.max(this.radius, Math.min(canvas.width - this.radius, this.x));
+                }
+                
+                if (this.y - this.radius < 0 || this.y + this.radius > canvas.height) {
+                    this.vy *= -0.8;
+                    this.y = Math.max(this.radius, Math.min(canvas.height - this.radius, this.y));
+                }
+                
+                // Add friction
+                this.vx *= 0.995;
+                this.vy *= 0.995;
+                
+                // Update trail
+                if (trails) {
+                    this.trail.push({ x: this.x, y: this.y });
+                    if (this.trail.length > 20) {
+                        this.trail.shift();
+                    }
+                }
+                
+                // Particle interactions
+                particles.forEach(other => {
+                    if (other !== this) {
+                        const dx = other.x - this.x;
+                        const dy = other.y - this.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (distance < this.radius + other.radius) {
+                            // Collision response
+                            const angle = Math.atan2(dy, dx);
+                            const sin = Math.sin(angle);
+                            const cos = Math.cos(angle);
+                            
+                            // Separate particles
+                            const overlap = this.radius + other.radius - distance;
+                            this.x -= cos * overlap * 0.5;
+                            this.y -= sin * overlap * 0.5;
+                            other.x += cos * overlap * 0.5;
+                            other.y += sin * overlap * 0.5;
+                            
+                            // Exchange velocities (simplified)
+                            const tempVx = this.vx;
+                            const tempVy = this.vy;
+                            this.vx = other.vx * 0.8;
+                            this.vy = other.vy * 0.8;
+                            other.vx = tempVx * 0.8;
+                            other.vy = tempVy * 0.8;
+                        }
+                    }
+                });
+                
+                // Update life
+                this.life -= this.decay;
+            }
+            
+            draw() {
+                // Draw trail
+                if (trails && this.trail.length > 1) {
+                    ctx.strokeStyle = this.color.replace('60%)', '30%)');
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(this.trail[0].x, this.trail[0].y);
+                    
+                    for (let i = 1; i < this.trail.length; i++) {
+                        const alpha = i / this.trail.length;
+                        ctx.globalAlpha = alpha * 0.5;
+                        ctx.lineTo(this.trail[i].x, this.trail[i].y);
+                    }
+                    
+                    ctx.stroke();
+                    ctx.globalAlpha = 1;
+                }
+                
+                // Draw particle
+                const gradient = ctx.createRadialGradient(
+                    this.x - this.radius * 0.3, 
+                    this.y - this.radius * 0.3, 
+                    0,
+                    this.x, 
+                    this.y, 
+                    this.radius
+                );
+                
+                gradient.addColorStop(0, this.color.replace('60%)', '80%)'));
+                gradient.addColorStop(1, this.color.replace('60%)', '40%)'));
+                
+                ctx.fillStyle = gradient;
+                ctx.globalAlpha = this.life;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Add glow effect
+                ctx.shadowColor = this.color;
+                ctx.shadowBlur = 10;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius * 0.6, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.shadowBlur = 0;
+                ctx.globalAlpha = 1;
+            }
+            
+            isDead() {
+                return this.life <= 0;
+            }
+        }
+        
+        function addParticles(count = 5) {
+            for (let i = 0; i < count; i++) {
+                const x = Math.random() * (canvas.width - 100) + 50;
+                const y = Math.random() * (canvas.height - 100) + 50;
+                particles.push(new Particle(x, y));
+            }
+            updateParticleCount();
+        }
+        
+        function clearParticles() {
+            particles = [];
+            updateParticleCount();
+        }
+        
+        function toggleGravity() {
+            gravity = !gravity;
+            document.getElementById('gravityStatus').textContent = gravity ? 'ON' : 'OFF';
+        }
+        
+        function toggleTrails() {
+            trails = !trails;
+            document.getElementById('trailsStatus').textContent = trails ? 'ON' : 'OFF';
+            
+            // Clear existing trails
+            particles.forEach(particle => {
+                particle.trail = [];
+            });
+        }
+        
+        function updateParticleCount() {
+            document.getElementById('particleCount').textContent = particles.length;
+        }
+        
+        // Mouse interaction
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            // Create explosion of particles at click location
+            for (let i = 0; i < 3; i++) {
+                const particle = new Particle(x, y);
+                particle.vx = (Math.random() - 0.5) * 12;
+                particle.vy = (Math.random() - 0.5) * 12;
+                particles.push(particle);
+            }
+            updateParticleCount();
+        });
+        
+        // Animation loop
+        function animate() {
+            // Clear canvas with fade effect
+            if (trails) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            } else {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+            }
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Update and draw particles
+            particles = particles.filter(particle => {
+                particle.update();
+                particle.draw();
+                return !particle.isDead();
+            });
+            
+            updateParticleCount();
+            requestAnimationFrame(animate);
+        }
+        
+        // Initialize
+        addParticles(10);
+        animate();
+    </script>
+</body>
+</html> 
