@@ -1,36 +1,255 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 90-Day Interactive Project Showcase
 
-## Getting Started
+A dynamic website to showcase 90 unique projects (1 per day) with interactive demonstrations embedded directly in the site. Built with Next.js, featuring a modern design and smooth user experience.
 
-First, run the development server:
+## 🎯 Project Overview
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+This is a **living showcase** that grows daily with new interactive projects. The goal is to build a compelling portfolio where visitors can actually **use** each project rather than just read about them.
+
+### Current Status
+- **Projects Completed**: 3/90
+- **Current Day**: 3
+- **Technologies Used**: 15+
+- **Total Hours**: 400+
+
+## ✨ Features
+
+### Core Features
+- **Interactive Project Demos**: Each project is fully functional and usable in the browser
+- **Real-time Progress Tracking**: Visual progress bars and statistics
+- **Advanced Filtering**: Search by title, tags, technologies, and more
+- **Responsive Design**: Optimized for all devices and screen sizes
+- **Smooth Animations**: Powered by Framer Motion for engaging interactions
+- **"Surprise Me" Button**: Discover random projects with smooth scrolling highlight
+
+### Project Categories
+- 🎮 **Games**: Interactive games and playable experiences
+- 📊 **Data Visualization**: Interactive charts and data explorations
+- 🛠️ **Utilities**: Practical tools and applications
+- 🎨 **Art & Creative**: Visual experiments and creative coding
+- 🔬 **Experiments**: Technical demos and proof-of-concepts
+
+## 🛠️ Technical Stack
+
+### Frontend
+- **Next.js 15** - React framework with App Router
+- **React 18** - UI library with hooks and context
+- **Tailwind CSS** - Utility-first CSS framework
+- **Framer Motion** - Animation library for smooth interactions
+
+### Interactive Technologies
+- **Three.js** - 3D graphics and WebGL
+- **Canvas API** - 2D graphics and animations
+- **p5.js** - Creative coding library
+- **D3.js** - Data visualization
+- **Chart.js** - Chart and graph library
+
+### Development Tools
+- **TypeScript** - Type safety (optional)
+- **ESLint** - Code linting
+- **Prettier** - Code formatting
+- **Git** - Version control
+
+## 📁 Project Structure
+
+```
+my-90-day-showcase/
+├── src/
+│   ├── app/
+│   │   ├── page.js                 # Homepage
+│   │   ├── layout.js               # Root layout
+│   │   ├── globals.css            # Global styles
+│   │   ├── project/
+│   │   │   └── [day]/
+│   │   │       └── page.js        # Individual project pages
+│   │   ├── games/
+│   │   │   └── page.js            # Games category page
+│   │   └── about/
+│   │       └── page.js            # About page
+│   ├── components/
+│   │   ├── ProjectCard.js         # Project card component
+│   │   ├── ProjectDemo.js         # Interactive demo component
+│   │   ├── FilterBar.js           # Search and filter component
+│   │   └── ProgressTracker.js     # Progress visualization
+│   ├── data/
+│   │   └── projects.json          # Project metadata
+│   └── lib/
+│       └── utils.js               # Utility functions
+├── public/
+│   ├── thumbnails/                # Project thumbnail images
+│   └── projects/                  # Project assets
+└── package.json                   # Dependencies and scripts
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🚀 Getting Started
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Prerequisites
+- Node.js 18+ 
+- npm or yarn
+- Git
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Installation
 
-## Learn More
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd my-90-day-showcase
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+3. **Start development server**
+   ```bash
+   npm run dev
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+4. **Open your browser**
+   Navigate to `http://localhost:3000`
 
-## Deploy on Vercel
+### Build for Production
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npm run build
+npm start
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📝 Adding New Projects
+
+### Daily Workflow
+
+1. **Create project files**
+   ```bash
+   mkdir public/projects/day-X
+   # Add your project files here
+   ```
+
+2. **Add thumbnail**
+   ```bash
+   # Add thumbnail image to public/thumbnails/dayX.png
+   ```
+
+3. **Update projects.json**
+   ```json
+   {
+     "day": X,
+     "title": "Project Title",
+     "date": "2025-01-XX",
+     "tags": ["tag1", "tag2"],
+     "technologies": ["React", "Canvas API"],
+     "description": "Project description...",
+     "timeSpent": "X hours",
+     "githubUrl": "https://github.com/user/project-X",
+     "liveDemo": true,
+     "thumbnail": "/thumbnails/dayX.png",
+     "featured": false
+   }
+   ```
+
+4. **Test and deploy**
+   ```bash
+   npm run build
+   git add .
+   git commit -m "Add Day X: Project Title"
+   git push
+   ```
+
+### Project Templates
+
+The system supports various project types:
+
+- **Canvas Projects**: 2D animations and games
+- **Three.js Projects**: 3D graphics and experiences  
+- **React Components**: Interactive UI components
+- **Data Visualizations**: Charts and data explorations
+- **Utility Applications**: Practical tools and calculators
+
+## 🎨 Design System
+
+### Color Palette
+- **Primary**: Blue (#2563eb)
+- **Secondary**: Purple (#7c3aed)
+- **Success**: Green (#10b981)
+- **Warning**: Yellow (#f59e0b)
+- **Error**: Red (#ef4444)
+
+### Typography
+- **Headings**: System fonts with varying weights
+- **Body**: -apple-system, BlinkMacSystemFont, 'Segoe UI'
+- **Code**: Menlo, Monaco, 'Courier New'
+
+### Components
+- **Cards**: Rounded corners, subtle shadows, hover animations
+- **Buttons**: Gradient backgrounds, smooth transitions
+- **Inputs**: Clean borders, focus states, validation
+
+## 🚀 Deployment
+
+### Vercel (Recommended)
+1. Connect GitHub repository to Vercel
+2. Deploy automatically on every push
+3. Custom domain configuration available
+
+### Netlify Alternative
+1. Build command: `npm run build`
+2. Publish directory: `out` (if using static export)
+3. Environment variables configuration
+
+## 📊 Success Metrics
+
+### User Experience Goals
+- ✅ Site loads in under 3 seconds
+- ✅ All demos work on mobile devices
+- ✅ Search/filter responds instantly
+- ✅ Intuitive navigation and fast browsing
+- ✅ Engaging animations and interactions
+
+### Technical Goals
+- ✅ Clean, maintainable code structure
+- ✅ Responsive design for all screen sizes
+- ✅ SEO optimized with proper meta tags
+- ✅ Accessibility compliance (WCAG 2.1)
+- ✅ Performance optimized (Lighthouse 90+)
+
+## 🤝 Contributing
+
+This is a personal challenge project, but feedback and suggestions are welcome!
+
+1. **Report Issues**: Use GitHub Issues for bugs or suggestions
+2. **Feature Requests**: Open a discussion for new ideas
+3. **Pull Requests**: Small improvements and fixes are appreciated
+
+## 📚 Learning Resources
+
+### Inspiration
+- [100 Days of Code](https://www.100daysofcode.com/)
+- [Creative Coding](https://www.openprocessing.org/)
+- [Codepen](https://codepen.io/)
+
+### Technical References
+- [Next.js Documentation](https://nextjs.org/docs)
+- [React Documentation](https://react.dev/)
+- [Three.js Documentation](https://threejs.org/docs/)
+- [Canvas API MDN](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API)
+
+## 📄 License
+
+This project is open source and available under the [MIT License](LICENSE).
+
+## 🎯 Challenge Philosophy
+
+> "The expert in anything was once a beginner who refused to give up."
+
+This challenge is about:
+- **Consistency** over perfection
+- **Learning** through building
+- **Sharing** the journey publicly
+- **Inspiring** others to start their own challenges
+
+---
+
+**Built with ❤️ and lots of ☕ during the 90-day challenge**
+
+*Last updated: January 2025*

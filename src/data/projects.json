@@ -1,0 +1,41 @@
+[
+  {
+    "day": 1,
+    "title": "Particle Physics Sandbox",
+    "date": "2025-01-17",
+    "tags": ["physics", "canvas", "interactive"],
+    "technologies": ["JavaScript", "Canvas API"],
+    "description": "Interactive particle system with gravity simulation where users can create and manipulate particles with different properties",
+    "timeSpent": "4 hours",
+    "githubUrl": "https://github.com/user/project-1",
+    "liveDemo": true,
+    "thumbnail": "/thumbnails/day1.png",
+    "featured": false
+  },
+  {
+    "day": 2,
+    "title": "Weather Data Visualizer",
+    "date": "2025-01-18",
+    "tags": ["data-viz", "weather", "charts"],
+    "technologies": ["React", "D3.js", "Weather API"],
+    "description": "Interactive weather data visualization showing temperature trends, precipitation, and climate patterns",
+    "timeSpent": "5 hours",
+    "githubUrl": "https://github.com/user/project-2",
+    "liveDemo": true,
+    "thumbnail": "/thumbnails/day2.png",
+    "featured": true
+  },
+  {
+    "day": 3,
+    "title": "Snake Game 3D",
+    "date": "2025-01-19",
+    "tags": ["game", "3d", "threejs"],
+    "technologies": ["Three.js", "JavaScript"],
+    "description": "Classic snake game reimagined in 3D space with modern controls and smooth animations",
+    "timeSpent": "6 hours",
+    "githubUrl": "https://github.com/user/project-3",
+    "liveDemo": true,
+    "thumbnail": "/thumbnails/day3.png",
+    "featured": false
+  }
+] 
