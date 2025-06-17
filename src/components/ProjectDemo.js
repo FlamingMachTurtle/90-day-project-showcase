@@ -690,9 +690,9 @@ const ProjectDemo = ({ project }) => {
     let autoUpdateInterval;
     let useRealData = false;
     
-    // OpenWeatherMap API configuration
-            const API_KEY = '0151008a4defe17a6b4f974e7ee8e388';
-    const API_BASE_URL = 'https://api.openweathermap.org/data/2.5';
+    // WeatherAPI.com configuration
+    const API_KEY = 'ef3d2a7d17934063992224134251706';
+    const API_BASE_URL = 'https://api.weatherapi.com/v1';
     
     // Location data with coordinates
     const locationData = {
@@ -705,15 +705,15 @@ const ProjectDemo = ({ project }) => {
     
     // Real weather API functions
     async function fetchCurrentWeather(location) {
-              if (!API_KEY || API_KEY === 'demo_key') {
-          showApiKeyWarning();
-          return null;
-        }
+      if (!API_KEY || API_KEY === 'demo_key') {
+        showApiKeyWarning();
+        return null;
+      }
       
       try {
         const locationInfo = locationData[location];
         const response = await fetch(
-          `${API_BASE_URL}/weather?lat=${locationInfo.lat}&lon=${locationInfo.lon}&appid=${API_KEY}&units=metric`
+          `${API_BASE_URL}/current.json?key=${API_KEY}&q=${locationInfo.lat},${locationInfo.lon}&aqi=no`
         );
         
         if (!response.ok) {
@@ -722,17 +722,17 @@ const ProjectDemo = ({ project }) => {
         
         const data = await response.json();
         return {
-          temp: Math.round(data.main.temp),
-          humidity: data.main.humidity,
-          windSpeed: Math.round(data.wind.speed * 3.6), // Convert m/s to km/h
-          pressure: data.main.pressure
+          temp: Math.round(data.current.temp_c),
+          humidity: data.current.humidity,
+          windSpeed: Math.round(data.current.wind_kph),
+          pressure: Math.round(data.current.pressure_mb)
         };
       } catch (error) {
         console.error('Error fetching current weather:', error);
-        console.error('API URL:', `${API_BASE_URL}/weather?lat=${locationInfo.lat}&lon=${locationInfo.lon}&appid=${API_KEY}&units=metric`);
+        console.error('API URL:', `${API_BASE_URL}/current.json?key=${API_KEY}&q=${locationInfo.lat},${locationInfo.lon}&aqi=no`);
         
-        if (error.message.includes('401')) {
-          showError('API Key Error (401): Please check if your API key is valid and activated. It can take up to 2 hours for new keys to activate.');
+        if (error.message.includes('401') || error.message.includes('403')) {
+          showError('API Key Error: Please check if your WeatherAPI.com key is valid and activated.');
         } else if (error.message.includes('429')) {
           showError('Rate Limit Error (429): Too many API calls. Please wait a moment and try again.');
         } else {
@@ -760,11 +760,11 @@ const ProjectDemo = ({ project }) => {
       warning.innerHTML = `
         <strong>⚠️ Invalid API Key</strong><br>
         The current API key is invalid. To use real weather data:<br>
-        1. Sign up at <a href="https://openweathermap.org/api" target="_blank">OpenWeatherMap</a><br>
+        1. Sign up at <a href="https://www.weatherapi.com/" target="_blank">WeatherAPI.com</a><br>
         2. Get your API key from your account dashboard<br>
-        3. Wait up to 2 hours for activation<br>
-        4. Replace the API key in the code<br>
-        <small>Note: Free plan has 60 calls/minute limit</small><br>
+        3. Replace the API key in the code<br>
+        4. Enjoy 1M free calls per month!<br>
+        <small>Note: Free plan includes current weather & 7-day history</small><br>
         <button onclick="this.parentElement.remove()" style="margin-top: 10px; padding: 5px 10px; border: none; background: #f59e0b; color: white; border-radius: 5px; cursor: pointer;">Close</button>
       `;
       document.body.appendChild(warning);
