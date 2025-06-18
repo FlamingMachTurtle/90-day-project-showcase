@@ -66,6 +66,44 @@
             opacity: 0.8;
         }
         
+        .camera-controls {
+            font-size: 0.85rem;
+            opacity: 0.7;
+            margin-top: 0.5rem;
+        }
+        
+        .game-controls {
+            font-size: 0.85rem;
+            opacity: 0.6;
+            margin-top: 0.25rem;
+        }
+        
+        .start-game-btn {
+            background: linear-gradient(45deg, #00ff44, #00dd22);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 1rem;
+            box-shadow: 0 4px 15px rgba(0, 255, 68, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .start-game-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 255, 68, 0.4);
+        }
+        
+        .start-game-btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
         #gameCanvas {
             border-radius: 15px;
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
@@ -190,7 +228,11 @@
         <div class="game-info">
             <div class="score">Score: <span id="score">0</span></div>
             <div class="direction">Direction: <span id="direction">RIGHT ➡️</span></div>
-            <div class="controls-info">Click canvas to focus, then use WASD or Arrow keys</div>
+            <div class="controls-info">
+                <div class="camera-controls">🖱️ Mouse: Orbit camera | 🖱️ Wheel: Zoom in/out</div>
+                <div class="game-controls">🎮 WASD or Arrow keys to move snake (when game starts)</div>
+                <button id="startGameBtn" class="start-game-btn">🚀 Start Game</button>
+            </div>
         </div>
         
         <canvas id="gameCanvas" width="800" height="600" tabindex="0"></canvas>
@@ -226,12 +268,30 @@
         let snake = [{ x: 10, y: 10, z: 0 }];
         let food = { x: 15, y: 15, z: 0 };
         let direction = { x: 1, y: 0, z: 0 };
-        let gameRunning = true;
+        let gameRunning = false; // Start in camera mode
+        let gameStarted = false; // Track if game has been started
         let score = 0;
         let lastMoveTime = 0;
         let gameSpeed = 300; // milliseconds
         let lastDirectionChange = 0;
         let directionChangeDelay = 100;
+        
+        // Camera controls
+        let cameraRadius = 12.5;
+        let cameraTheta = -1.540; // horizontal angle (your preferred angle)
+        let cameraPhi = 0.581; // vertical angle (your preferred angle)
+        let isDragging = false;
+        let mouseX = 0;
+        let mouseY = 0;
+        let targetCameraRadius = 12.5;
+        const minRadius = 6;
+        const maxRadius = 25;
+        const minPhi = 0.1; // prevent going below the plane
+        const maxPhi = Math.PI / 2 - 0.1; // prevent going too high
+        
+        // Camera angle logging
+        let lastLogTime = 0;
+        const LOG_INTERVAL = 15000; // 15 seconds
         
         // Game constants
         const GRID_SIZE = 20;
@@ -263,11 +323,20 @@
             canvas.tabIndex = 0;
             canvas.style.outline = 'none';
             
-            // Materials
-            snakeMaterial = new THREE.MeshLambertMaterial({ color: 0x00ff00 });
-            headMaterial = new THREE.MeshLambertMaterial({ color: 0x00aa00 });
-            foodMaterial = new THREE.MeshLambertMaterial({ color: 0xff0000 });
-            gridMaterial = new THREE.LineBasicMaterial({ color: 0x444444 });
+            // Materials with enhanced glow
+            snakeMaterial = new THREE.MeshLambertMaterial({ 
+                color: 0x00ff44,
+                emissive: 0x004400
+            });
+            headMaterial = new THREE.MeshLambertMaterial({ 
+                color: 0x00dd22,
+                emissive: 0x006600
+            });
+            foodMaterial = new THREE.MeshLambertMaterial({ 
+                color: 0xff3300,
+                emissive: 0x880000
+            });
+            gridMaterial = new THREE.LineBasicMaterial({ color: 0x555555 });
             
             // Geometries
             boxGeometry = new THREE.BoxGeometry(CELL_SIZE, CELL_SIZE, CELL_SIZE);
@@ -276,16 +345,15 @@
             // Create grid
             createGrid();
             
-            // Lighting
-            const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
+            // Enhanced lighting for better glow visibility
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.3);
             scene.add(ambientLight);
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.7);
             directionalLight.position.set(10, 10, 5);
             scene.add(directionalLight);
             
-            // Camera position
-            camera.position.set(0, 0, 15);
-            camera.lookAt(0, 0, 0);
+            // Initialize camera position
+            updateCameraPosition();
             
             // Event listeners
             canvas.addEventListener('keydown', handleKeyPress);
@@ -297,13 +365,24 @@
                 canvas.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.4)';
             });
             
+            // Mouse controls for camera
+            canvas.addEventListener('mousedown', handleMouseDown);
+            canvas.addEventListener('mousemove', handleMouseMove);
+            canvas.addEventListener('mouseup', handleMouseUp);
+            canvas.addEventListener('wheel', handleWheel);
+            canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+            
             // Global spacebar listener for restart
             document.addEventListener('keydown', (event) => {
-                if (event.code === 'Space' && !gameRunning) {
+                if (event.code === 'Space' && !gameRunning && gameStarted) {
                     event.preventDefault();
                     restartGame();
                 }
             });
+            
+            // Start game button
+            const startBtn = document.getElementById('startGameBtn');
+            startBtn.addEventListener('click', startGame);
             
             // Initialize game
             updateSnake();
@@ -334,8 +413,24 @@
             scene.add(gridGroup);
         }
         
-        function createSnakeSegment(x, y, z, isHead = false) {
-            const segment = new THREE.Mesh(boxGeometry, isHead ? headMaterial : snakeMaterial);
+        function createSnakeSegment(x, y, z, isHead = false, segmentIndex = 0) {
+            // Create material with much more visible progressive glow
+            let material;
+            if (isHead) {
+                const glowIntensity = Math.min(0.3 + (snake.length * 0.02), 0.8);
+                material = new THREE.MeshLambertMaterial({ 
+                    color: 0x00dd22,
+                    emissive: new THREE.Color(0x006600).multiplyScalar(glowIntensity)
+                });
+            } else {
+                const glowIntensity = Math.min(0.2 + (snake.length * 0.01), 0.6);
+                material = new THREE.MeshLambertMaterial({ 
+                    color: 0x00ff44,
+                    emissive: new THREE.Color(0x004400).multiplyScalar(glowIntensity)
+                });
+            }
+            
+            const segment = new THREE.Mesh(boxGeometry, material);
             segment.position.set(
                 (x - GRID_SIZE/2) * CELL_SIZE,
                 (y - GRID_SIZE/2) * CELL_SIZE,
@@ -346,7 +441,13 @@
         }
         
         function createFood(x, y, z) {
-            const food = new THREE.Mesh(sphereGeometry, foodMaterial);
+            // Create much more visible glowing food material
+            const glowingFoodMaterial = new THREE.MeshLambertMaterial({ 
+                color: 0xff3300,
+                emissive: 0xaa0000
+            });
+            
+            const food = new THREE.Mesh(sphereGeometry, glowingFoodMaterial);
             food.position.set(
                 (x - GRID_SIZE/2) * CELL_SIZE,
                 (y - GRID_SIZE/2) * CELL_SIZE,
@@ -430,7 +531,9 @@
             document.getElementById('score').textContent = score;
             
             let directionText = '';
-            if (direction.x === 1) directionText = 'RIGHT ➡️';
+            if (!gameStarted) {
+                directionText = 'CAMERA MODE 📹';
+            } else if (direction.x === 1) directionText = 'RIGHT ➡️';
             else if (direction.x === -1) directionText = 'LEFT ⬅️';
             else if (direction.y === 1) directionText = 'UP ⬆️';
             else if (direction.y === -1) directionText = 'DOWN ⬇️';
@@ -438,7 +541,78 @@
             document.getElementById('direction').textContent = directionText;
         }
         
+        function startGame() {
+            gameStarted = true;
+            gameRunning = true;
+            lastMoveTime = performance.now();
+            
+            // Hide start button
+            const startBtn = document.getElementById('startGameBtn');
+            startBtn.style.display = 'none';
+            
+            // Update UI
+            updateUI();
+            
+            // Focus canvas for keyboard input
+            document.getElementById('gameCanvas').focus();
+            
+            console.log('🎮 Game Started! Use WASD or Arrow keys to control the snake.');
+        }
+        
+        // Camera control functions
+        function updateCameraPosition() {
+            // Smooth interpolation for zoom
+            cameraRadius += (targetCameraRadius - cameraRadius) * 0.1;
+            
+            // Convert spherical coordinates to Cartesian
+            const x = cameraRadius * Math.sin(cameraPhi) * Math.cos(cameraTheta);
+            const y = cameraRadius * Math.sin(cameraPhi) * Math.sin(cameraTheta);
+            const z = cameraRadius * Math.cos(cameraPhi);
+            
+            camera.position.set(x, y, z);
+            camera.lookAt(0, 0, 0);
+        }
+        
+        function handleMouseDown(event) {
+            isDragging = true;
+            mouseX = event.clientX;
+            mouseY = event.clientY;
+            document.getElementById('gameCanvas').style.cursor = 'grabbing';
+        }
+        
+        function handleMouseMove(event) {
+            if (!isDragging) return;
+            
+            const deltaX = event.clientX - mouseX;
+            const deltaY = event.clientY - mouseY;
+            
+            // Update camera angles
+            cameraTheta -= deltaX * 0.01;
+            cameraPhi = Math.max(minPhi, Math.min(maxPhi, cameraPhi + deltaY * 0.01));
+            
+            mouseX = event.clientX;
+            mouseY = event.clientY;
+            
+            updateCameraPosition();
+        }
+        
+        function handleMouseUp(event) {
+            isDragging = false;
+            document.getElementById('gameCanvas').style.cursor = 'pointer';
+        }
+        
+        function handleWheel(event) {
+            event.preventDefault();
+            
+            const zoomSpeed = 0.5;
+            targetCameraRadius += event.deltaY * zoomSpeed * 0.01;
+            targetCameraRadius = Math.max(minRadius, Math.min(maxRadius, targetCameraRadius));
+        }
+        
         function handleKeyPress(event) {
+            // Only handle game controls if game has started
+            if (!gameStarted) return;
+            
             const currentTime = Date.now();
             if (currentTime - lastDirectionChange < directionChangeDelay) return;
             
@@ -496,10 +670,22 @@
             snake = [{ x: 10, y: 10, z: 0 }];
             food = generateFood();
             direction = { x: 1, y: 0, z: 0 };
-            gameRunning = true;
+            gameRunning = false; // Start in camera mode again
+            gameStarted = false;
             score = 0;
             lastMoveTime = 0;
             lastDirectionChange = 0;
+            
+            // Show start button again
+            const startBtn = document.getElementById('startGameBtn');
+            startBtn.style.display = 'block';
+            
+            // Reset camera controls to your preferred angle
+            cameraRadius = 12.5;
+            targetCameraRadius = 12.5;
+            cameraTheta = -1.540;
+            cameraPhi = 0.581;
+            isDragging = false;
             
             // Hide game over screen
             document.getElementById('gameOver').style.display = 'none';
@@ -508,6 +694,7 @@
             updateSnake();
             updateFood();
             updateUI();
+            updateCameraPosition();
             
             // Focus canvas
             document.getElementById('gameCanvas').focus();
@@ -516,24 +703,36 @@
         function animate(currentTime) {
             requestAnimationFrame(animate);
             
+            // Log camera angles every 15 seconds
+            if (currentTime - lastLogTime > LOG_INTERVAL) {
+                const thetaDegrees = (cameraTheta * 180 / Math.PI).toFixed(1);
+                const phiDegrees = (cameraPhi * 180 / Math.PI).toFixed(1);
+                console.log(`📹 Camera Angles - Theta: ${thetaDegrees}°, Phi: ${phiDegrees}°, Radius: ${cameraRadius.toFixed(1)}`);
+                console.log(`📐 Raw Values - cameraTheta: ${cameraTheta.toFixed(3)}, cameraPhi: ${cameraPhi.toFixed(3)}, cameraRadius: ${cameraRadius.toFixed(1)}`);
+                lastLogTime = currentTime;
+            }
+            
             // Game logic
-            if (gameRunning && currentTime - lastMoveTime > gameSpeed) {
+            if (gameRunning && gameStarted && currentTime - lastMoveTime > gameSpeed) {
                 updateGame();
                 lastMoveTime = currentTime;
             }
             
-            // Animate food
+            // Animate food with enhanced pulsing glow
             if (foodMesh) {
                 foodMesh.rotation.y += 0.02;
                 foodMesh.position.z = Math.sin(currentTime * 0.005) * 0.1;
+                
+                // Enhanced pulsing glow effect for food
+                const pulseFactor = (Math.sin(currentTime * 0.008) + 1) * 0.5; // 0 to 1
+                const baseEmissive = 0xaa0000;
+                const pulseEmissive = 0xff0000;
+                const currentEmissive = baseEmissive + Math.floor(pulseFactor * (pulseEmissive - baseEmissive));
+                foodMesh.material.emissive.setHex(currentEmissive);
             }
             
-            // Animate camera (subtle orbit)
-            const radius = 15;
-            const speed = 0.0005;
-            camera.position.x = Math.cos(currentTime * speed) * radius * 0.3;
-            camera.position.z = Math.sin(currentTime * speed) * radius * 0.3 + radius;
-            camera.lookAt(0, 0, 0);
+            // Update camera position (handles user controls and smooth interpolation)
+            updateCameraPosition();
             
             renderer.render(scene, camera);
         }

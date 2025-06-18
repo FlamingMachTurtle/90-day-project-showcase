@@ -14,6 +14,13 @@ const ProjectDemo = ({ project }) => {
       return;
     }
 
+    // Check if this project has an external demo
+    if (project.externalDemo) {
+      setDemoType('external');
+      setIsLoading(false);
+      return;
+    }
+
     // Prevent multiple instances
     if (gameInstanceRef.current) {
       return;
@@ -1830,6 +1837,31 @@ const ProjectDemo = ({ project }) => {
         <p className="text-sm text-gray-600">
           This project doesn't have a live demo component yet.
         </p>
+      </div>
+    );
+  }
+
+  if (demoType === 'external') {
+    return (
+      <div className="relative">
+        <div className="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-lg p-6 text-center border border-blue-200">
+          <div className="text-blue-600 mb-3">🌐 External Demo Available</div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">{project.title}</h3>
+          <p className="text-sm text-gray-600 mb-4">{project.description}</p>
+          <div className="space-y-3">
+            <a 
+              href={project.externalDemo}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            >
+              🚀 Open Live Demo
+            </a>
+            <div className="text-xs text-gray-500">
+              Opens in a new tab as a standalone application
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
