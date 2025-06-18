@@ -251,7 +251,7 @@
                             type="password" 
                             id="api-key-input" 
                             placeholder="Enter your WeatherAPI.com key" 
-                            style="padding: 0.5rem 0.75rem; border: 2px solid #9ca3af; border-radius: 8px; font-size: 0.9rem; width: 250px;"
+                            style="padding: 0.5rem 0.75rem; border: 2px solid #9ca3af; border-radius: 8px; font-size: 16px; width: 250px; font-family: monospace; color: #1f2937; font-weight: bold; letter-spacing: 2px;"
                         />
                     </div>
                     <button id="save-api-key" style="background: #10b981; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-weight: 600;">
@@ -569,6 +569,16 @@
                 } else {
                     apiKeyPanel.style.display = 'none';
                     changeApiKeyBtnContainer.style.display = 'block';
+                    
+                    // Update button text to show masked API key
+                    if (API_KEY && API_KEY.length > 0) {
+                        const maskedKey = API_KEY.length > 8 ? 
+                            API_KEY.substring(0, 4) + '••••••••' + API_KEY.substring(API_KEY.length - 4) : 
+                            '••••••••';
+                        changeApiKeyBtn.innerHTML = `🔑 Change API Key (${maskedKey})`;
+                        changeApiKeyBtn.style.color = '#ffffff';
+                        changeApiKeyBtn.style.fontWeight = 'bold';
+                    }
                 }
             }
             

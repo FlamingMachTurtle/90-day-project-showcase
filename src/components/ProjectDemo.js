@@ -621,6 +621,7 @@ const ProjectDemo = ({ project }) => {
                   id="api-key-input" 
                   placeholder="Enter your WeatherAPI.com key" 
                   class="px-3 py-2 border border-gray-300 rounded-md text-sm w-64 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  style="font-family: monospace; font-size: 16px; color: #1f2937; font-weight: bold; letter-spacing: 2px;"
                 />
               </div>
               <button id="save-api-key" class="bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-green-700 transition-colors">
@@ -745,6 +746,16 @@ const ProjectDemo = ({ project }) => {
         } else {
           apiKeyPanel.style.display = 'none';
           changeApiKeyBtnContainer.style.display = 'block';
+          
+          // Update button text to show masked API key
+          if (API_KEY && API_KEY.length > 0) {
+            const maskedKey = API_KEY.length > 8 ? 
+              API_KEY.substring(0, 4) + '••••••••' + API_KEY.substring(API_KEY.length - 4) : 
+              '••••••••';
+            changeApiKeyBtn.innerHTML = `🔑 Change API Key (${maskedKey})`;
+            changeApiKeyBtn.style.color = '#ffffff';
+            changeApiKeyBtn.style.fontWeight = 'bold';
+          }
         }
       }
       
