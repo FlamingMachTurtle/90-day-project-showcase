@@ -605,8 +605,14 @@ const ProjectDemo = ({ project }) => {
           <h3 class="text-2xl font-bold text-gray-900 mb-2">Interactive Weather Data Visualizer</h3>
           <p class="text-gray-600">Live weather data from around the world with interactive charts and controls</p>
           
+          <!-- Data Source Indicator -->
+          <div id="data-source-indicator" class="inline-flex items-center gap-2 bg-gray-800 text-white px-4 py-3 rounded-full text-sm font-bold mt-4 shadow-lg border-2 border-gray-600">
+            <span id="data-source-icon">🔄</span>
+            <span id="data-source-text">Loading...</span>
+          </div>
+          
           <!-- API Key Configuration Panel -->
-          <div class="bg-white p-4 rounded-lg shadow-sm mt-4 border-2 border-blue-200">
+          <div id="api-key-panel" class="bg-white p-4 rounded-lg shadow-sm mt-4 border-2 border-blue-200">
             <div class="flex items-center justify-center gap-3 flex-wrap">
               <div class="flex items-center gap-2">
                 <label for="api-key-input" class="text-sm font-semibold text-gray-700">🔑 API Key:</label>
@@ -629,10 +635,11 @@ const ProjectDemo = ({ project }) => {
             </div>
           </div>
           
-          <!-- Data Source Indicator -->
-          <div id="data-source-indicator" class="inline-flex items-center gap-2 bg-gray-800 text-white px-4 py-3 rounded-full text-sm font-bold mt-3 shadow-lg border-2 border-gray-600">
-            <span id="data-source-icon">🔄</span>
-            <span id="data-source-text">Loading...</span>
+          <!-- Change API Key Button (hidden by default) -->
+          <div id="change-api-key-btn-container" class="mt-4" style="display: none;">
+            <button id="change-api-key-btn" class="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors">
+              🔑 Change API Key
+            </button>
           </div>
         </div>
         
@@ -726,11 +733,33 @@ const ProjectDemo = ({ project }) => {
       const apiKeyInput = document.getElementById('api-key-input');
       const saveButton = document.getElementById('save-api-key');
       const clearButton = document.getElementById('clear-api-key');
+      const apiKeyPanel = document.getElementById('api-key-panel');
+      const changeApiKeyBtn = document.getElementById('change-api-key-btn');
+      const changeApiKeyBtnContainer = document.getElementById('change-api-key-btn-container');
       
-      // Load existing API key
+      // Function to toggle API key panel visibility
+      function toggleApiKeyPanel(show) {
+        if (show) {
+          apiKeyPanel.style.display = 'block';
+          changeApiKeyBtnContainer.style.display = 'none';
+        } else {
+          apiKeyPanel.style.display = 'none';
+          changeApiKeyBtnContainer.style.display = 'block';
+        }
+      }
+      
+      // Load existing API key and set initial state
       if (API_KEY) {
         apiKeyInput.value = API_KEY;
+        toggleApiKeyPanel(false); // Hide panel if API key exists
+      } else {
+        toggleApiKeyPanel(true); // Show panel if no API key
       }
+      
+      // Change API Key button handler
+      changeApiKeyBtn.onclick = () => {
+        toggleApiKeyPanel(true);
+      };
       
       // Save API key
       saveButton.onclick = () => {
@@ -739,6 +768,7 @@ const ProjectDemo = ({ project }) => {
           localStorage.setItem('weatherapi_key', newKey);
           API_KEY = newKey;
           showInfo('API key saved! Refreshing weather data...');
+          toggleApiKeyPanel(false); // Hide panel after saving
           
           // Refresh weather data with new key
           const currentLocation = document.getElementById('location-select').value;
@@ -755,6 +785,7 @@ const ProjectDemo = ({ project }) => {
         API_KEY = '';
         apiKeyInput.value = '';
         showInfo('API key cleared. Switching to simulated data...');
+        toggleApiKeyPanel(true); // Show panel after clearing
         
         // Refresh with simulated data
         const currentLocation = document.getElementById('location-select').value;

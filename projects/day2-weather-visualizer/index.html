@@ -236,8 +236,14 @@
             <h1>🌦️ Weather Data Visualizer</h1>
             <p>Live weather data from around the world with interactive charts and controls</p>
             
+            <!-- Data Source Indicator -->
+            <div id="data-source-indicator" style="display: inline-flex; align-items: center; gap: 0.5rem; background: #374151; color: white; padding: 0.75rem 1.25rem; border-radius: 20px; font-size: 0.9rem; font-weight: 700; box-shadow: 0 4px 12px rgba(0,0,0,0.2); border: 2px solid #4b5563; margin: 1.5rem 0;">
+                <span id="data-source-icon">🔄</span>
+                <span id="data-source-text">Loading...</span>
+            </div>
+            
             <!-- API Key Configuration Panel -->
-            <div style="background: white; padding: 1.5rem; border-radius: 15px; margin: 1.5rem 0; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); border: 2px solid #3b82f6;">
+            <div id="api-key-panel" style="background: white; padding: 1.5rem; border-radius: 15px; margin: 1.5rem 0; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); border: 2px solid #3b82f6;">
                 <div style="display: flex; align-items: center; justify-content: center; gap: 1rem; flex-wrap: wrap;">
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
                         <label for="api-key-input" style="font-weight: 600; color: #1f2937;">🔑 API Key:</label>
@@ -260,10 +266,11 @@
                 </div>
             </div>
             
-            <!-- Data Source Indicator -->
-            <div id="data-source-indicator" style="display: inline-flex; align-items: center; gap: 0.5rem; background: #374151; color: white; padding: 0.75rem 1.25rem; border-radius: 20px; font-size: 0.9rem; font-weight: 700; box-shadow: 0 4px 12px rgba(0,0,0,0.2); border: 2px solid #4b5563;">
-                <span id="data-source-icon">🔄</span>
-                <span id="data-source-text">Loading...</span>
+            <!-- Change API Key Button (hidden by default) -->
+            <div id="change-api-key-btn-container" style="margin: 1.5rem 0; display: none;">
+                <button id="change-api-key-btn" style="background: #3b82f6; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                    🔑 Change API Key
+                </button>
             </div>
         </div>
         
@@ -550,11 +557,33 @@
             const apiKeyInput = document.getElementById('api-key-input');
             const saveButton = document.getElementById('save-api-key');
             const clearButton = document.getElementById('clear-api-key');
+            const apiKeyPanel = document.getElementById('api-key-panel');
+            const changeApiKeyBtn = document.getElementById('change-api-key-btn');
+            const changeApiKeyBtnContainer = document.getElementById('change-api-key-btn-container');
             
-            // Load existing API key
+            // Function to toggle API key panel visibility
+            function toggleApiKeyPanel(show) {
+                if (show) {
+                    apiKeyPanel.style.display = 'block';
+                    changeApiKeyBtnContainer.style.display = 'none';
+                } else {
+                    apiKeyPanel.style.display = 'none';
+                    changeApiKeyBtnContainer.style.display = 'block';
+                }
+            }
+            
+            // Load existing API key and set initial state
             if (API_KEY) {
                 apiKeyInput.value = API_KEY;
+                toggleApiKeyPanel(false); // Hide panel if API key exists
+            } else {
+                toggleApiKeyPanel(true); // Show panel if no API key
             }
+            
+            // Change API Key button handler
+            changeApiKeyBtn.onclick = () => {
+                toggleApiKeyPanel(true);
+            };
             
             // Save API key
             saveButton.onclick = () => {
@@ -563,6 +592,7 @@
                     localStorage.setItem('weatherapi_key', newKey);
                     API_KEY = newKey;
                     showInfo('API key saved! Refreshing weather data...');
+                    toggleApiKeyPanel(false); // Hide panel after saving
                     
                     // Refresh weather data with new key
                     const currentLocation = document.getElementById('location-select').value;
@@ -579,6 +609,7 @@
                 API_KEY = '';
                 apiKeyInput.value = '';
                 showInfo('API key cleared. Switching to simulated data...');
+                toggleApiKeyPanel(true); // Show panel after clearing
                 
                 // Refresh with simulated data
                 const currentLocation = document.getElementById('location-select').value;
