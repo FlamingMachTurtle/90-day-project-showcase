@@ -604,6 +604,36 @@ const ProjectDemo = ({ project }) => {
         <div class="text-center">
           <h3 class="text-2xl font-bold text-gray-900 mb-2">Interactive Weather Data Visualizer</h3>
           <p class="text-gray-600">Live weather data from around the world with interactive charts and controls</p>
+          
+          <!-- API Key Configuration Panel -->
+          <div class="bg-white p-4 rounded-lg shadow-sm mt-4 border-2 border-blue-200">
+            <div class="flex items-center justify-center gap-3 flex-wrap">
+              <div class="flex items-center gap-2">
+                <label for="api-key-input" class="text-sm font-semibold text-gray-700">🔑 API Key:</label>
+                <input 
+                  type="password" 
+                  id="api-key-input" 
+                  placeholder="Enter your WeatherAPI.com key" 
+                  class="px-3 py-2 border border-gray-300 rounded-md text-sm w-64 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              <button id="save-api-key" class="bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-green-700 transition-colors">
+                💾 Save Key
+              </button>
+              <button id="clear-api-key" class="bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-700 transition-colors">
+                🗑️ Clear
+              </button>
+            </div>
+            <div class="mt-2 text-xs text-gray-600 text-center">
+              Get your free API key at <a href="https://www.weatherapi.com/" target="_blank" class="text-blue-600 hover:underline">WeatherAPI.com</a> (1M free calls/month)
+            </div>
+          </div>
+          
+          <!-- Data Source Indicator -->
+          <div id="data-source-indicator" class="inline-flex items-center gap-2 bg-gray-800 text-white px-4 py-3 rounded-full text-sm font-bold mt-3 shadow-lg border-2 border-gray-600">
+            <span id="data-source-icon">🔄</span>
+            <span id="data-source-text">Loading...</span>
+          </div>
         </div>
         
         <!-- Current Weather Display -->
@@ -649,11 +679,8 @@ const ProjectDemo = ({ project }) => {
             </div>
           </div>
           <div class="mt-4">
-            <button id="refresh-btn" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors mr-2">
+            <button id="refresh-btn" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
               🔄 Refresh Weather Data
-            </button>
-            <button id="auto-update-btn" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors">
-              ⚡ Auto Update
             </button>
           </div>
         </div>
@@ -674,6 +701,75 @@ const ProjectDemo = ({ project }) => {
     
     demoRef.current.appendChild(container);
     
+    // API Key Management Functions
+    function updateDataSourceIndicator(isRealData, hasApiKey) {
+      const indicator = document.getElementById('data-source-indicator');
+      const icon = document.getElementById('data-source-icon');
+      const text = document.getElementById('data-source-text');
+      
+      if (!hasApiKey) {
+        indicator.className = 'inline-flex items-center gap-2 bg-yellow-600 text-white px-4 py-3 rounded-full text-sm font-bold mt-3 shadow-lg border-2 border-yellow-500';
+        icon.textContent = '⚠️';
+        text.textContent = 'Using Simulated Data - Enter API Key for Real Weather';
+      } else if (isRealData) {
+        indicator.className = 'inline-flex items-center gap-2 bg-green-600 text-white px-4 py-3 rounded-full text-sm font-bold mt-3 shadow-lg border-2 border-green-500';
+        icon.textContent = '✅';
+        text.textContent = 'Real Weather Data from WeatherAPI.com';
+      } else {
+        indicator.className = 'inline-flex items-center gap-2 bg-orange-600 text-white px-4 py-3 rounded-full text-sm font-bold mt-3 shadow-lg border-2 border-orange-500';
+        icon.textContent = '🔄';
+        text.textContent = 'Mixed Data - Some Real, Some Simulated';
+      }
+    }
+    
+    function setupApiKeyHandlers() {
+      const apiKeyInput = document.getElementById('api-key-input');
+      const saveButton = document.getElementById('save-api-key');
+      const clearButton = document.getElementById('clear-api-key');
+      
+      // Load existing API key
+      if (API_KEY) {
+        apiKeyInput.value = API_KEY;
+      }
+      
+      // Save API key
+      saveButton.onclick = () => {
+        const newKey = apiKeyInput.value.trim();
+        if (newKey) {
+          localStorage.setItem('weatherapi_key', newKey);
+          API_KEY = newKey;
+          showInfo('API key saved! Refreshing weather data...');
+          
+          // Refresh weather data with new key
+          const currentLocation = document.getElementById('location-select').value;
+          const currentPeriod = parseInt(document.getElementById('period-select').value);
+          loadWeatherData(currentLocation, currentPeriod);
+        } else {
+          showError('Please enter a valid API key');
+        }
+      };
+      
+      // Clear API key
+      clearButton.onclick = () => {
+        localStorage.removeItem('weatherapi_key');
+        API_KEY = '';
+        apiKeyInput.value = '';
+        showInfo('API key cleared. Switching to simulated data...');
+        
+        // Refresh with simulated data
+        const currentLocation = document.getElementById('location-select').value;
+        const currentPeriod = parseInt(document.getElementById('period-select').value);
+        loadWeatherData(currentLocation, currentPeriod);
+      };
+      
+      // Allow Enter key to save
+      apiKeyInput.onkeypress = (e) => {
+        if (e.key === 'Enter') {
+          saveButton.click();
+        }
+      };
+    }
+    
         // Weather data simulation
     let currentWeather = {
       temp: 22,
@@ -682,12 +778,11 @@ const ProjectDemo = ({ project }) => {
       pressure: 1013
     };
 
-    let isAutoUpdating = false;
-    let autoUpdateInterval;
+
     let useRealData = true; // Always use real data
     
-    // WeatherAPI.com configuration
-    const API_KEY = 'ef3d2a7d17934063992224134251706';
+    // WeatherAPI.com configuration - API key stored in localStorage
+    let API_KEY = localStorage.getItem('weatherapi_key') || '';
     const API_BASE_URL = 'https://api.weatherapi.com/v1';
     
     // Location data with coordinates
@@ -701,9 +796,8 @@ const ProjectDemo = ({ project }) => {
     
     // Real weather API functions
     async function fetchCurrentWeather(location) {
-      if (!API_KEY || API_KEY === 'demo_key') {
-        showApiKeyWarning();
-        return null;
+      if (!API_KEY || API_KEY.trim() === '') {
+        return null; // Return null to trigger simulation mode
       }
       
       try {
@@ -739,9 +833,8 @@ const ProjectDemo = ({ project }) => {
     }
     
     async function fetchHistoricalWeather(location, days = 7) {
-      if (!API_KEY || API_KEY === 'demo_key') {
-        showApiKeyWarning();
-        return null;
+      if (!API_KEY || API_KEY.trim() === '') {
+        return null; // Return null to trigger simulation mode
       }
       
       try {
@@ -945,26 +1038,27 @@ const ProjectDemo = ({ project }) => {
     }
     
     // Generate sample weather data
-    function generateWeatherData(days = 7) {
+    function generateWeatherData(days = 7, location = 'london') {
       const data = [];
       const now = new Date();
+      const locationInfo = locationData[location] || locationData.london;
       
       for (let i = 0; i < days; i++) {
         const date = new Date(now);
         date.setDate(date.getDate() - (days - 1 - i));
         
-        // Simulate seasonal temperature variation
-        const baseTemp = 20 + Math.sin((date.getMonth() / 12) * Math.PI * 2) * 10;
-        const dailyVariation = Math.random() * 10 - 5;
-        const temp = Math.round(baseTemp + dailyVariation);
+        // Use location-specific base values with realistic variations
+        const seasonalFactor = Math.sin((date.getMonth() / 12) * Math.PI * 2) * 3;
+        const temp = Math.round(locationInfo.temp + seasonalFactor + (Math.random() - 0.5) * 8);
         
         data.push({
           date: date,
           temp: temp,
-          humidity: Math.round(40 + Math.random() * 40),
-          precipitation: Math.random() * 20,
-          windSpeed: Math.round(5 + Math.random() * 25),
-          pressure: Math.round(990 + Math.random() * 40)
+          humidity: Math.max(20, Math.min(100, locationInfo.humidity + (Math.random() - 0.5) * 30)),
+          precipitation: Math.random() * 12,
+          windSpeed: Math.max(0, locationInfo.windSpeed + (Math.random() - 0.5) * 15),
+          pressure: Math.max(980, Math.min(1040, locationInfo.pressure + (Math.random() - 0.5) * 20)),
+          isRealData: false
         });
       }
       
@@ -1501,16 +1595,33 @@ const ProjectDemo = ({ project }) => {
       const initialLocation = 'london';
       const initialPeriod = 7; // Default to 7 days
       
-      console.log('Initializing weather app with real data...');
+      console.log('Initializing weather app...');
       
-      // Fetch real weather data on load
+      // Setup API key handlers first
+      setupApiKeyHandlers();
+      
+      // Update initial data source indicator
+      updateDataSourceIndicator(false, !!API_KEY);
+      
+      // Fetch weather data on load
       const realWeather = await fetchCurrentWeather(initialLocation);
       if (realWeather) {
         console.log('Real current weather fetched:', realWeather);
         currentWeather = realWeather;
         updateCurrentWeatherDisplay();
+        updateDataSourceIndicator(true, true);
       } else {
-        console.warn('Failed to fetch current weather, using default');
+        console.log('Using simulated weather data');
+        // Generate simulated current weather for the location
+        const locationInfo = locationData[initialLocation];
+        currentWeather = {
+          temp: locationInfo.temp + Math.round((Math.random() - 0.5) * 6),
+          humidity: locationInfo.humidity + Math.round((Math.random() - 0.5) * 20),
+          windSpeed: locationInfo.windSpeed + Math.round((Math.random() - 0.5) * 8),
+          pressure: locationInfo.pressure + Math.round((Math.random() - 0.5) * 10)
+        };
+        updateCurrentWeatherDisplay();
+        updateDataSourceIndicator(false, !!API_KEY);
       }
       
       // Fetch data based on period
@@ -1518,6 +1629,8 @@ const ProjectDemo = ({ project }) => {
     }
     
     async function loadWeatherData(location, days) {
+      let hasRealData = false;
+      
       if (days === 1) {
         // For 1 day, show only current weather as a single data point
         const currentData = await fetchCurrentWeather(location);
@@ -1532,6 +1645,23 @@ const ProjectDemo = ({ project }) => {
             pressure: currentData.pressure,
             isRealData: true
           }];
+          hasRealData = true;
+          createTemperatureChart(weatherData);
+          createPrecipitationChart(weatherData);
+        } else {
+          // Generate simulated current weather data
+          const locationInfo = locationData[location];
+          const today = new Date();
+          weatherData = [{
+            date: today,
+            temp: locationInfo.temp + Math.round((Math.random() - 0.5) * 6),
+            humidity: locationInfo.humidity + Math.round((Math.random() - 0.5) * 20),
+            precipitation: Math.random() * 5,
+            windSpeed: locationInfo.windSpeed + Math.round((Math.random() - 0.5) * 8),
+            pressure: locationInfo.pressure + Math.round((Math.random() - 0.5) * 10),
+            isRealData: false
+          }];
+          hasRealData = false;
           createTemperatureChart(weatherData);
           createPrecipitationChart(weatherData);
         }
@@ -1539,18 +1669,23 @@ const ProjectDemo = ({ project }) => {
         // For 7 days, fetch historical data
         const historicalData = await fetchHistoricalWeather(location, days);
         if (historicalData && historicalData.length > 0) {
-          console.log('Real historical data fetched:', historicalData.length, 'days');
+          console.log('Historical data fetched:', historicalData.length, 'days');
           weatherData = historicalData;
+          hasRealData = historicalData.some(d => d.isRealData);
           createTemperatureChart(weatherData);
           createPrecipitationChart(weatherData);
         } else {
-          console.warn('Failed to fetch historical data, using fallback');
+          console.log('Using simulated historical data');
           // Fallback to generated data if API fails
-          weatherData = generateWeatherData(days);
+          weatherData = generateWeatherData(days, location);
+          hasRealData = false;
           createTemperatureChart(weatherData);
           createPrecipitationChart(weatherData);
         }
       }
+      
+      // Update data source indicator
+      updateDataSourceIndicator(hasRealData, !!API_KEY);
     }
     
     // Start initialization
@@ -1578,31 +1713,7 @@ const ProjectDemo = ({ project }) => {
       await loadWeatherData(location, period);
     });
     
-    document.getElementById('auto-update-btn').addEventListener('click', (e) => {
-      isAutoUpdating = !isAutoUpdating;
-      
-      if (isAutoUpdating) {
-        e.target.textContent = '⏸️ Stop Auto Update';
-        e.target.className = 'bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors';
-        
-        autoUpdateInterval = setInterval(async () => {
-          // Fetch fresh real weather data
-          const location = document.getElementById('location-select').value;
-          const realWeather = await fetchCurrentWeather(location);
-          if (realWeather) {
-            currentWeather = realWeather;
-            updateCurrentWeatherDisplay();
-          }
-        }, 5000); // Update every 5 seconds
-      } else {
-        e.target.textContent = '⚡ Auto Update';
-        e.target.className = 'bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors';
-        
-        if (autoUpdateInterval) {
-          clearInterval(autoUpdateInterval);
-        }
-      }
-    });
+
     
     document.getElementById('location-select').addEventListener('change', async (e) => {
       const location = e.target.value;
@@ -1627,15 +1738,10 @@ const ProjectDemo = ({ project }) => {
       await loadWeatherData(location, period);
     });
     
-    // Cleanup function for auto-update
-    const cleanup = () => {
-      if (autoUpdateInterval) {
-        clearInterval(autoUpdateInterval);
-      }
-    };
-    
     // Store cleanup function for later use
-    container.cleanup = cleanup;
+    container.cleanup = () => {
+      // Any cleanup needed for the weather visualizer
+    };
   };
 
   const loadReactDemo = async () => {
