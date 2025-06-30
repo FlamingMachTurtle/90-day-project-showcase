@@ -1,43 +1,32 @@
 [
   {
     "day": 1,
-    "title": "Particle Physics Sandbox",
+    "title": "Particle Physics Simulation",
     "date": "2025-01-17",
-    "tags": ["physics", "canvas", "interactive"],
-    "technologies": ["JavaScript", "Canvas API"],
-    "description": "Interactive particle system with gravity simulation where users can create and manipulate particles with different properties",
-    "timeSpent": "4 hours",
-    "githubUrl": "https://github.com/user/project-1",
-    "liveDemo": true,
-    "thumbnail": "/thumbnails/day1.png",
-    "featured": false
+    "description": "An interactive particle physics simulation using WebGL and Three.js",
+    "thumbnail": "/thumbnails/day1.svg",
+    "tags": ["Physics", "Simulation", "Interactive"],
+    "technologies": ["WebGL", "Three.js", "JavaScript"],
+    "featured": true
   },
   {
     "day": 2,
     "title": "Weather Data Visualizer",
     "date": "2025-06-17",
-    "tags": ["data-viz", "weather", "api"],
-    "technologies": ["JavaScript", "Chart.js", "WeatherAPI"],
-    "description": "Professional weather analytics dashboard with real-time data from global weather stations, featuring interactive charts and API integration",
-    "timeSpent": "8 hours",
-    "githubUrl": "https://github.com/FlamingMachTurtle/weather-data-visualizer",
-    "liveDemo": true,
-    "externalDemo": "https://flamingmachturtle.github.io/weather-data-visualizer",
-    "thumbnail": "/thumbnails/day2.png",
-    "featured": true
+    "description": "Real-time weather data visualization with interactive maps",
+    "thumbnail": "/thumbnails/day2.svg",
+    "tags": ["Data Visualization", "Weather", "Maps"],
+    "technologies": ["D3.js", "OpenWeatherMap API", "React"],
+    "featured": false
   },
   {
     "day": 3,
-    "title": "Snake Game 3D",
+    "title": "3D Snake Game",
     "date": "2025-06-17",
-    "tags": ["game", "3d", "threejs"],
-    "technologies": ["Three.js", "JavaScript"],
-    "description": "Classic snake game reimagined in 3D space with orbit camera controls, mouse zoom, and enhanced glow effects",
-    "timeSpent": "6 hours",
-    "githubUrl": "https://github.com/user/project-3",
-    "liveDemo": true,
-    "externalDemo": "http://localhost:8080",
-    "thumbnail": "/thumbnails/day3.png",
+    "description": "A 3D version of the classic Snake game using WebGL",
+    "thumbnail": "/thumbnails/day3.svg",
+    "tags": ["Game", "3D", "Interactive"],
+    "technologies": ["WebGL", "Three.js", "JavaScript"],
     "featured": false
   }
 ] 

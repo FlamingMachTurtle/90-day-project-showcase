@@ -7,7 +7,8 @@ export async function POST(request) {
   
   if (password === 'elig') {
     // Set HTTP-only cookie that expires in 24 hours
-    cookies().set('auth', 'true', {
+    const cookieStore = await cookies();
+    await cookieStore.set('auth', 'true', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
@@ -21,11 +22,13 @@ export async function POST(request) {
 }
 
 export async function DELETE() {
-  cookies().delete('auth');
+  const cookieStore = await cookies();
+  await cookieStore.delete('auth');
   return Response.json({ success: true });
 }
 
 export async function GET() {
-  const isAuthenticated = cookies().get('auth')?.value === 'true';
+  const cookieStore = await cookies();
+  const isAuthenticated = (await cookieStore.get('auth'))?.value === 'true';
   return Response.json({ isAuthenticated });
 } 

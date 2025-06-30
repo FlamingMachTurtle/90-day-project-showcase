@@ -1,9 +1,12 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { formatDate } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
 const ProjectCard = ({ project }) => {
   const { day, title, date, tags, technologies, description, thumbnail, featured } = project;
+  const defaultThumbnail = `/projects/default-project.svg`;
+  const projectThumbnail = thumbnail || `/thumbnails/day${day}.svg`;
 
   return (
     <motion.div
@@ -17,24 +20,19 @@ const ProjectCard = ({ project }) => {
       <Link href={`/project/${day}`}>
         <div className="cursor-pointer group">
           {/* Thumbnail */}
-          <div className="relative h-44 bg-gradient-to-br from-blue-50 to-indigo-50 overflow-hidden">
-            {thumbnail ? (
-              <img
-                src={thumbnail}
-                alt={title}
-                className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
-                onError={(e) => {
-                  e.target.style.display = 'none';
-                  e.target.nextSibling.style.display = 'flex';
-                }}
-              />
-            ) : null}
-            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-blue-50/90 to-purple-50/90">
-              <div className="text-center transform group-hover:scale-110 transition-transform duration-300">
-                <div className="text-3xl font-bold text-blue-600/90 mb-1">#{day}</div>
-                <div className="text-sm text-blue-500/80">Day {day}</div>
-              </div>
-            </div>
+          <div className="relative h-48 overflow-hidden">
+            <Image
+              src={projectThumbnail}
+              alt={title}
+              className="object-cover group-hover:scale-105 transition-transform duration-300"
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              priority={featured}
+              onError={(e) => {
+                // Fallback to default thumbnail if project thumbnail fails to load
+                e.currentTarget.src = defaultThumbnail;
+              }}
+            />
             
             {/* Featured Badge */}
             {featured && (
@@ -50,46 +48,42 @@ const ProjectCard = ({ project }) => {
           </div>
 
           {/* Content */}
-          <div className="p-5">
+          <div className="p-4">
             <div className="flex items-start justify-between mb-2">
-              <h3 className="text-lg font-bold text-gray-900 leading-tight group-hover:text-blue-600 transition-colors duration-200">{title}</h3>
-              <div className="text-xs text-gray-500 ml-2 whitespace-nowrap">{formatDate(date)}</div>
+              <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-200">
+                {title}
+              </h3>
+              <span className="text-sm text-gray-500 ml-2 whitespace-nowrap">
+                {formatDate(date)}
+              </span>
             </div>
             
-            <p className="text-gray-600 text-sm mb-3 line-clamp-2">{description}</p>
-            
+            <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+              {description}
+            </p>
+
             {/* Tags */}
-            <div className="flex flex-wrap gap-1.5 mb-3">
-              {tags.slice(0, 3).map((tag) => (
+            <div className="flex flex-wrap gap-1.5 mb-2">
+              {tags?.map((tag, index) => (
                 <span
-                  key={tag}
-                  className="inline-block bg-blue-50 text-blue-700 text-xs px-2 py-0.5 rounded-full font-medium"
+                  key={index}
+                  className="px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full text-xs font-medium"
                 >
-                  #{tag}
+                  {tag}
                 </span>
               ))}
-              {tags.length > 3 && (
-                <span className="inline-block bg-gray-50 text-gray-600 text-xs px-2 py-0.5 rounded-full">
-                  +{tags.length - 3}
-                </span>
-              )}
             </div>
-            
+
             {/* Technologies */}
             <div className="flex flex-wrap gap-1.5">
-              {technologies.slice(0, 2).map((tech) => (
+              {technologies?.map((tech, index) => (
                 <span
-                  key={tech}
-                  className="inline-block bg-green-50 text-green-700 text-xs px-2 py-0.5 rounded font-medium"
+                  key={index}
+                  className="px-2 py-0.5 bg-purple-50 text-purple-600 rounded-full text-xs font-medium"
                 >
                   {tech}
                 </span>
               ))}
-              {technologies.length > 2 && (
-                <span className="inline-block bg-gray-50 text-gray-600 text-xs px-2 py-0.5 rounded">
-                  +{technologies.length - 2}
-                </span>
-              )}
             </div>
           </div>
         </div>
