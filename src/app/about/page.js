@@ -62,23 +62,22 @@ export default function AboutPage() {
         >
           <div className="bg-white rounded-xl p-8 shadow-sm">
             <h2 className="text-3xl font-bold text-gray-900 mb-6">The Story Behind the Challenge</h2>
-            <div className="prose prose-lg text-gray-700 max-w-none">
-              <p className="mb-4">
-                In January 2025, I embarked on an ambitious journey: to build 90 unique, interactive 
-                projects in 90 consecutive days. This wasn't just about coding—it was about pushing 
-                the boundaries of creativity, learning new technologies, and proving that consistent 
-                daily practice can transform anyone into a skilled developer.
-              </p>
-              <p className="mb-4">
-                Each project had to be <strong>interactive</strong>—visitors can actually use them, 
-                not just read about them. From particle physics simulations to 3D games, from data 
-                visualizations to useful utilities, every project represents a day of focused learning 
-                and building.
+            <div className="prose prose-lg max-w-none text-gray-600">
+              <p>
+                Summer 2025 marks the beginning of my ambitious project: building 90 interactive web projects 
+                before the fall semester begins. This isn't about rigid rules or perfect streaks—it's about 
+                exploring my creativity, learning new technologies, and growing as a developer through consistent practice.
               </p>
               <p>
-                The goal wasn't perfection, but progress. Some projects took 2 hours, others took 8. 
-                Some were simple experiments, others were complex applications. What mattered was 
-                showing up every single day and creating something new.
+                Each project is designed to be interactive—something you can actually use or play with in your browser. 
+                From physics simulations to 3D games, from data visualizations to practical tools, every project represents 
+                a new learning opportunity and a chance to build something unique.
+              </p>
+              <p>
+                The goal isn't perfection or burning myself out—it's about progress and exploration. Some projects might 
+                take a day, others might span a week. Some are quick experiments, others are more complex applications. 
+                What matters is the journey of learning and creating, while maintaining a healthy balance with summer activities 
+                and other commitments.
               </p>
             </div>
           </div>
@@ -92,28 +91,28 @@ export default function AboutPage() {
           transition={{ duration: 0.6, delay: 0.4 }}
         >
           <div className="bg-blue-50 rounded-xl p-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">Challenge Rules</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">Project Guidelines</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <div className="flex items-start space-x-3">
                   <div className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">1</div>
                   <div>
-                    <h4 className="font-semibold text-gray-900">One Project Per Day</h4>
-                    <p className="text-gray-600 text-sm">Build and complete one interactive project every single day for 90 days.</p>
+                    <h4 className="font-semibold text-gray-900">Build Interactive Projects</h4>
+                    <p className="text-gray-600 text-sm">Create projects that users can engage with - games, tools, or experiments they can try in their browser.</p>
                   </div>
                 </div>
                 <div className="flex items-start space-x-3">
                   <div className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">2</div>
                   <div>
-                    <h4 className="font-semibold text-gray-900">Must Be Interactive</h4>
-                    <p className="text-gray-600 text-sm">Visitors must be able to use, play, or interact with each project.</p>
+                    <h4 className="font-semibold text-gray-900">Learn Something New</h4>
+                    <p className="text-gray-600 text-sm">Each project should involve learning or practicing a new skill, technology, or technique.</p>
                   </div>
                 </div>
                 <div className="flex items-start space-x-3">
                   <div className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">3</div>
                   <div>
-                    <h4 className="font-semibold text-gray-900">No Skipping Days</h4>
-                    <p className="text-gray-600 text-sm">Consistency is key. Missing a day means starting over.</p>
+                    <h4 className="font-semibold text-gray-900">Stay Consistent</h4>
+                    <p className="text-gray-600 text-sm">Aim to work on projects regularly, but take breaks when needed. Quality over quantity.</p>
                   </div>
                 </div>
               </div>
@@ -121,22 +120,22 @@ export default function AboutPage() {
                 <div className="flex items-start space-x-3">
                   <div className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">4</div>
                   <div>
-                    <h4 className="font-semibold text-gray-900">Share Everything</h4>
-                    <p className="text-gray-600 text-sm">All projects must be publicly accessible with source code available.</p>
+                    <h4 className="font-semibold text-gray-900">Document the Process</h4>
+                    <p className="text-gray-600 text-sm">Share code, write about challenges faced, and track progress to help others learn.</p>
                   </div>
                 </div>
                 <div className="flex items-start space-x-3">
                   <div className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">5</div>
                   <div>
-                    <h4 className="font-semibold text-gray-900">Document the Journey</h4>
-                    <p className="text-gray-600 text-sm">Track time spent, technologies learned, and challenges faced.</p>
+                    <h4 className="font-semibold text-gray-900">Be Creative</h4>
+                    <p className="text-gray-600 text-sm">Don't be afraid to experiment with new ideas or put your own spin on existing concepts.</p>
                   </div>
                 </div>
                 <div className="flex items-start space-x-3">
                   <div className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">6</div>
                   <div>
-                    <h4 className="font-semibold text-gray-900">Focus on Learning</h4>
-                    <p className="text-gray-600 text-sm">Try new technologies, techniques, and creative approaches regularly.</p>
+                    <h4 className="font-semibold text-gray-900">Have Fun</h4>
+                    <p className="text-gray-600 text-sm">Enjoy the process of building and learning - it's summer after all!</p>
                   </div>
                 </div>
               </div>
@@ -180,23 +179,23 @@ export default function AboutPage() {
           transition={{ duration: 0.6, delay: 0.8 }}
         >
           <div className="bg-gradient-to-r from-green-600 to-blue-600 rounded-xl p-8 text-white">
-            <h2 className="text-3xl font-bold mb-8 text-center">Challenge Statistics</h2>
+            <h2 className="text-3xl font-bold mb-8 text-center">Summer Goals</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               <div className="text-center">
                 <div className="text-4xl font-bold mb-2">90</div>
-                <div className="text-green-100 text-sm">Days Total</div>
+                <div className="text-green-100 text-sm">Projects Goal</div>
               </div>
               <div className="text-center">
                 <div className="text-4xl font-bold mb-2">3</div>
-                <div className="text-green-100 text-sm">Completed So Far</div>
+                <div className="text-green-100 text-sm">Months of Summer</div>
               </div>
               <div className="text-4xl font-bold mb-2 text-center">
-                <div>400+</div>
-                <div className="text-green-100 text-sm">Hours Coded</div>
+                <div>10+</div>
+                <div className="text-green-100 text-sm">Project Categories</div>
               </div>
               <div className="text-center">
-                <div className="text-4xl font-bold mb-2">15+</div>
-                <div className="text-green-100 text-sm">Technologies Used</div>
+                <div className="text-4xl font-bold mb-2">∞</div>
+                <div className="text-green-100 text-sm">Possibilities</div>
               </div>
             </div>
           </div>

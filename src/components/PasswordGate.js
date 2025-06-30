@@ -1,39 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 
-export default function AuthPage() {
+export default function PasswordGate() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [attempts, setAttempts] = useState(0);
-  const [cooldownTime, setCooldownTime] = useState(0);
-  const [remainingTime, setRemainingTime] = useState(0);
-  
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const redirectPath = searchParams.get('redirect') || '/';
-
-  // Handle cooldown timer
-  useEffect(() => {
-    let interval;
-    if (remainingTime > 0) {
-      interval = setInterval(() => {
-        setRemainingTime(prev => {
-          if (prev <= 1000) {
-            setError('');
-            return 0;
-          }
-          return prev - 1000;
-        });
-      }, 1000);
-    }
-    
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [remainingTime]);
+  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -43,65 +17,20 @@ export default function AuthPage() {
       return;
     }
 
-    if (remainingTime > 0) {
-      const minutes = Math.ceil(remainingTime / 1000 / 60);
-      setError(`Please wait ${minutes} minute${minutes > 1 ? 's' : ''} before trying again`);
-      return;
-    }
-
     setLoading(true);
     setError('');
 
-    try {
-      const response = await fetch('/api/auth', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ password }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        // Success - redirect to intended page
-        router.push(redirectPath);
-        router.refresh();
-      } else {
-        // Handle different error types
-        if (response.status === 429) {
-          // Rate limited
-          setRemainingTime(data.remainingTime);
-          setError(data.error);
-        } else {
-          // Wrong password
-          setAttempts(data.attempts || 0);
-          setError(data.error);
-          
-          // Show progressive warning messages
-          if (data.attempts >= 3) {
-            setError(`${data.error}. ${data.attempts}/10 attempts used.`);
-          }
-          if (data.attempts >= 8) {
-            setError(`${data.error}. WARNING: Further attempts will result in longer cooldowns.`);
-          }
-        }
-        
-        // Clear password field on error
+    // Simple delay to simulate loading
+    setTimeout(() => {
+      const success = login(password);
+      
+      if (!success) {
+        setError('Incorrect password. Please try again.');
         setPassword('');
       }
-    } catch (error) {
-      console.error('Login error:', error);
-      setError('Connection error. Please try again.');
-    } finally {
+      
       setLoading(false);
-    }
-  };
-
-  const formatTime = (ms) => {
-    const minutes = Math.floor(ms / 1000 / 60);
-    const seconds = Math.floor((ms / 1000) % 60);
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    }, 500);
   };
 
   return (
@@ -141,7 +70,7 @@ export default function AuthPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter password"
-                disabled={loading || remainingTime > 0}
+                disabled={loading}
                 className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
                 autoFocus
               />
@@ -151,32 +80,13 @@ export default function AuthPage() {
             {error && (
               <div className="bg-red-500/20 border border-red-500/30 rounded-xl p-3">
                 <p className="text-red-200 text-sm">{error}</p>
-                {remainingTime > 0 && (
-                  <p className="text-red-300 text-xs mt-1">
-                    Time remaining: {formatTime(remainingTime)}
-                  </p>
-                )}
-              </div>
-            )}
-
-            {/* Attempt Counter */}
-            {attempts > 0 && remainingTime === 0 && (
-              <div className="bg-yellow-500/20 border border-yellow-500/30 rounded-xl p-3">
-                <p className="text-yellow-200 text-sm">
-                  Failed attempts: {attempts}/10
-                  {attempts >= 3 && (
-                    <span className="block text-yellow-300 text-xs mt-1">
-                      Progressive cooldowns apply after more failures
-                    </span>
-                  )}
-                </p>
               </div>
             )}
 
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={loading || remainingTime > 0}
+              disabled={loading}
               className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:from-gray-500 disabled:to-gray-600 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-200 transform hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed"
             >
               {loading ? (
@@ -187,8 +97,6 @@ export default function AuthPage() {
                   </svg>
                   Verifying...
                 </div>
-              ) : remainingTime > 0 ? (
-                `Wait ${formatTime(remainingTime)}`
               ) : (
                 'Access Portfolio'
               )}
@@ -198,7 +106,7 @@ export default function AuthPage() {
           {/* Footer Info */}
           <div className="mt-8 text-center">
             <p className="text-white/50 text-xs">
-              🔒 Protected by secure authentication
+              Secure access to interactive project showcase
             </p>
           </div>
         </div>
