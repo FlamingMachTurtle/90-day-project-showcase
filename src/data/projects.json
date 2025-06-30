@@ -7,7 +7,9 @@
     "thumbnail": "/thumbnails/day1.svg",
     "tags": ["Physics", "Simulation", "Interactive"],
     "technologies": ["WebGL", "Three.js", "JavaScript"],
-    "featured": true
+    "featured": true,
+    "githubUrl": "https://github.com/FlamingMachTurtle/particle-physics-simulation",
+    "liveDemo": true
   },
   {
     "day": 2,
@@ -17,7 +19,10 @@
     "thumbnail": "/thumbnails/day2.svg",
     "tags": ["Data Visualization", "Weather", "Maps"],
     "technologies": ["D3.js", "OpenWeatherMap API", "React"],
-    "featured": false
+    "featured": false,
+    "githubUrl": "https://github.com/FlamingMachTurtle/weather-data-visualizer",
+    "liveDemo": true,
+    "externalDemo": "https://flamingmachturtle.github.io/weather-data-visualizer/"
   },
   {
     "day": 3,
@@ -27,6 +32,9 @@
     "thumbnail": "/thumbnails/day3.svg",
     "tags": ["Game", "3D", "Interactive"],
     "technologies": ["WebGL", "Three.js", "JavaScript"],
-    "featured": false
+    "featured": false,
+    "githubUrl": "https://github.com/FlamingMachTurtle/3d-snake-game",
+    "liveDemo": true,
+    "externalDemo": "/projects/day3-snake-3d/index.html"
   }
 ] 
