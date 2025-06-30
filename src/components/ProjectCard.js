@@ -7,6 +7,17 @@ const ProjectCard = ({ project }) => {
   const { day, title, date, tags, technologies, description, thumbnail, featured, githubUrl, liveDemo, externalDemo } = project;
   const defaultThumbnail = `/projects/default-project.svg`;
   const projectThumbnail = thumbnail || `/thumbnails/day${day}.svg`;
+  const demoUrl = externalDemo || `/project/${day}`;
+
+  const handleCardClick = () => {
+    if (liveDemo) {
+      if (externalDemo) {
+        window.open(externalDemo, '_blank', 'noopener,noreferrer');
+      } else {
+        window.location.href = `/project/${day}`;
+      }
+    }
+  };
 
   return (
     <motion.div
@@ -16,8 +27,10 @@ const ProjectCard = ({ project }) => {
       className={`relative bg-white rounded-xl shadow-sm hover:shadow-lg overflow-hidden border ${
         featured ? 'border-blue-400/50 ring-2 ring-blue-100' : 'border-gray-100'
       } transition-all duration-300`}
+      onClick={handleCardClick}
+      style={{ cursor: liveDemo ? 'pointer' : 'default' }}
     >
-      <div className="cursor-pointer group">
+      <div className="group">
         {/* Thumbnail */}
         <div className="relative h-48 overflow-hidden">
           <Image
@@ -86,7 +99,7 @@ const ProjectCard = ({ project }) => {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-2 mt-2">
+          <div className="flex gap-2 mt-2" onClick={(e) => e.stopPropagation()}>
             {githubUrl && (
               <a
                 href={githubUrl}
@@ -102,7 +115,7 @@ const ProjectCard = ({ project }) => {
             )}
             {liveDemo && (
               <a
-                href={externalDemo || `/project/${day}`}
+                href={demoUrl}
                 target={externalDemo ? "_blank" : "_self"}
                 rel={externalDemo ? "noopener noreferrer" : undefined}
                 className="text-sm px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 flex items-center gap-1.5"
