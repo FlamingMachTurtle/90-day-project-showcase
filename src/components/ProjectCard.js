@@ -6,12 +6,12 @@ import { formatDate } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
 const ProjectCard = ({ project }) => {
-  const { day, title, date, tags, technologies, description, thumbnail, featured, githubUrl, liveDemo } = project;
+  const { day, title, date, tags, technologies, description, thumbnail, featured, githubUrl, liveDemo, externalDemo } = project;
   const defaultThumbnail = `/projects/default-project.svg`;
   const projectThumbnail = thumbnail || `/thumbnails/day${day}.svg`;
 
   return (
-    <Link href={liveDemo ? `/project/${day}` : '#'} passHref>
+    <Link href={`/project/${day}`} passHref>
       <motion.div
         whileHover={{ scale: 1.02, y: -4 }}
         whileTap={{ scale: 0.98 }}
@@ -105,15 +105,17 @@ const ProjectCard = ({ project }) => {
                 </a>
               )}
               {liveDemo && (
-                <Link
-                  href={`/project/${day}`}
+                <a
+                  href={externalDemo}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="text-sm px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 flex items-center gap-1.5"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                   </svg>
                   Live Demo
-                </Link>
+                </a>
               )}
             </div>
           </div>

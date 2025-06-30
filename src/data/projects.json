@@ -10,7 +10,7 @@
     "featured": true,
     "githubUrl": "https://github.com/FlamingMachTurtle/particle-physics-simulation",
     "liveDemo": true,
-    "externalDemo": "/project/1"
+    "externalDemo": "https://flamingmachturtle.github.io/particle-physics-simulation/"
   },
   {
     "day": 2,
@@ -23,7 +23,7 @@
     "featured": false,
     "githubUrl": "https://github.com/FlamingMachTurtle/weather-data-visualizer",
     "liveDemo": true,
-    "externalDemo": "/project/2"
+    "externalDemo": "https://flamingmachturtle.github.io/weather-data-visualizer/"
   },
   {
     "day": 3,
@@ -36,6 +36,6 @@
     "featured": false,
     "githubUrl": "https://github.com/FlamingMachTurtle/3d-snake-game",
     "liveDemo": true,
-    "externalDemo": "/project/3"
+    "externalDemo": "https://flamingmachturtle.github.io/3d-snake-game/"
   }
 ] 
