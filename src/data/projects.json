@@ -9,8 +9,8 @@
     "technologies": ["WebGL", "Three.js", "JavaScript"],
     "featured": true,
     "githubUrl": "https://github.com/FlamingMachTurtle/particle-physics-simulation",
-    "liveDemo": true,
-    "externalDemo": "https://flamingmachturtle.github.io/particle-physics-simulation/"
+    "liveDemo": false,
+    "externalDemo": null
   },
   {
     "day": 2,
@@ -36,6 +36,6 @@
     "featured": false,
     "githubUrl": "https://github.com/FlamingMachTurtle/3d-snake-game",
     "liveDemo": true,
-    "externalDemo": "https://flamingmachturtle.github.io/3d-snake-game/"
+    "externalDemo": "/projects/day3-snake-3d/index.html"
   }
 ] 
