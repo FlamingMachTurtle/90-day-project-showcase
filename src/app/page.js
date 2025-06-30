@@ -180,63 +180,41 @@ export default function Home() {
           </motion.div>
         )}
 
-        {/* Call to Action */}
-        <motion.div 
-          className="mt-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-8 text-white text-center"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.8 }}
-        >
-          <h3 className="text-2xl font-bold mb-4">Ready to Start Your Own Challenge?</h3>
-          <p className="text-blue-100 mb-6 max-w-2xl mx-auto">
-            Join thousands of developers who have transformed their skills through consistent daily practice. 
-            Every expert was once a beginner who never gave up.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
-              View Source Code
-            </button>
-            <button className="border border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors">
-              Learn More
-            </button>
+        {/* Footer */}
+        <footer className="bg-gray-900 text-white py-12 mt-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div>
+                <h4 className="text-lg font-semibold mb-4">90-Day Showcase</h4>
+                <p className="text-gray-400">
+                  A journey of consistent learning and building, one project at a time.
+                </p>
+              </div>
+              <div>
+                <h4 className="text-lg font-semibold mb-4">Categories</h4>
+                <ul className="space-y-2 text-gray-400">
+                  <li><a href="/games" className="hover:text-white">Games</a></li>
+                  <li><a href="#" className="hover:text-white">Data Visualization</a></li>
+                  <li><a href="#" className="hover:text-white">Utilities</a></li>
+                  <li><a href="#" className="hover:text-white">Art & Creative</a></li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="text-lg font-semibold mb-4">Connect</h4>
+                <ul className="space-y-2 text-gray-400">
+                  <li><a href="#" className="hover:text-white">GitHub</a></li>
+                  <li><a href="#" className="hover:text-white">Twitter</a></li>
+                  <li><a href="#" className="hover:text-white">LinkedIn</a></li>
+                  <li><a href="/about" className="hover:text-white">About</a></li>
+                </ul>
+              </div>
+            </div>
+            <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+              <p>&copy; 2025 90-Day Project Showcase. Built with passion and persistence.</p>
+            </div>
           </div>
-        </motion.div>
+        </footer>
       </main>
-
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12 mt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div>
-              <h4 className="text-lg font-semibold mb-4">90-Day Showcase</h4>
-              <p className="text-gray-400">
-                A journey of consistent learning and building, one project at a time.
-              </p>
-            </div>
-            <div>
-              <h4 className="text-lg font-semibold mb-4">Categories</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="/games" className="hover:text-white">Games</a></li>
-                <li><a href="#" className="hover:text-white">Data Visualization</a></li>
-                <li><a href="#" className="hover:text-white">Utilities</a></li>
-                <li><a href="#" className="hover:text-white">Art & Creative</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-lg font-semibold mb-4">Connect</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white">GitHub</a></li>
-                <li><a href="#" className="hover:text-white">Twitter</a></li>
-                <li><a href="#" className="hover:text-white">LinkedIn</a></li>
-                <li><a href="/about" className="hover:text-white">About</a></li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2025 90-Day Project Showcase. Built with passion and persistence.</p>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 } 

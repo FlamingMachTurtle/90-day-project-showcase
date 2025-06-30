@@ -200,60 +200,6 @@ export default function AboutPage() {
             </div>
           </div>
         </motion.section>
-
-        {/* Inspiration Section */}
-        <motion.section 
-          className="mb-16"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 1.0 }}
-        >
-          <div className="bg-purple-50 rounded-xl p-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">Inspiration & Philosophy</h2>
-            <blockquote className="text-xl italic text-gray-700 mb-6 text-center border-l-4 border-purple-400 pl-6">
-              "The expert in anything was once a beginner who refused to give up."
-            </blockquote>
-            <div className="prose prose-lg text-gray-700 max-w-none">
-              <p className="mb-4">
-                This challenge is inspired by the belief that consistent daily practice, combined with 
-                public accountability, can transform anyone's skills dramatically. It's not about being 
-                the smartest person in the room—it's about being the most persistent.
-              </p>
-              <p>
-                Every project teaches something new, whether it's a technical skill, a design principle, 
-                or simply the discipline of finishing what you start. The goal isn't to create perfect 
-                code, but to create consistently and learn from every iteration.
-              </p>
-            </div>
-          </div>
-        </motion.section>
-
-        {/* Call to Action */}
-        <motion.div 
-          className="text-center"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 1.2 }}
-        >
-          <div className="bg-white rounded-xl p-8 shadow-sm">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Ready to Start Your Own Challenge?</h2>
-            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-              The journey of a thousand miles begins with a single step. Your journey of becoming 
-              an expert developer begins with a single project.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link 
-                href="/"
-                className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
-              >
-                Explore All Projects
-              </Link>
-              <button className="border border-blue-600 text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors">
-                Follow the Journey
-              </button>
-            </div>
-          </div>
-        </motion.div>
       </main>
     </div>
   );
