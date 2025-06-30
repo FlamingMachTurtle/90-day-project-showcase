@@ -31,7 +31,7 @@
     "date": "2025-06-17",
     "description": "A 3D version of the classic Snake game using WebGL",
     "thumbnail": "/thumbnails/day3.svg",
-    "tags": ["Game", "3D", "Interactive"],
+    "tags": ["game", "3D", "Interactive"],
     "technologies": ["WebGL", "Three.js", "JavaScript"],
     "featured": false,
     "githubUrl": "https://github.com/FlamingMachTurtle/3d-snake-game",

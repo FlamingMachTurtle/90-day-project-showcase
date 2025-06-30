@@ -88,11 +88,11 @@ export const getCompletionPercentage = (currentDay) => {
 // Generate project categories
 export const categorizeProjects = (projects) => {
   return {
-    games: projects.filter(p => p.tags.includes('game')),
-    dataViz: projects.filter(p => p.tags.includes('data-viz')),
-    utilities: projects.filter(p => p.tags.includes('utility')),
-    art: projects.filter(p => p.tags.includes('art')),
-    experiments: projects.filter(p => p.tags.includes('experiment'))
+    games: projects.filter(p => p.tags.some(tag => tag.toLowerCase() === 'game')),
+    dataViz: projects.filter(p => p.tags.some(tag => tag.toLowerCase() === 'data-viz')),
+    utilities: projects.filter(p => p.tags.some(tag => tag.toLowerCase() === 'utility')),
+    art: projects.filter(p => p.tags.some(tag => tag.toLowerCase() === 'art')),
+    experiments: projects.filter(p => p.tags.some(tag => tag.toLowerCase() === 'experiment'))
   };
 };
 
