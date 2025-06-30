@@ -111,8 +111,8 @@ export default function AboutPage() {
                 <div className="flex items-start space-x-3">
                   <div className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">3</div>
                   <div>
-                    <h4 className="font-semibold text-gray-900">Stay Consistent</h4>
-                    <p className="text-gray-600 text-sm">Aim to work on projects regularly, but take breaks when needed. Quality over quantity.</p>
+                    <h4 className="font-semibold text-gray-900">Flexible Streaks</h4>
+                    <p className="text-gray-600 text-sm">Project streaks have a 72-hour grace period between submissions, allowing for a balanced schedule while maintaining momentum.</p>
                   </div>
                 </div>
               </div>

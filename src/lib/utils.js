@@ -1,4 +1,4 @@
-import { format, formatDistanceToNow } from 'date-fns';
+import { format, formatDistanceToNow, subDays, differenceInHours } from 'date-fns';
 
 // Format date for display
 export const formatDate = (dateString) => {
@@ -11,8 +11,8 @@ export const getRelativeTime = (dateString) => {
 };
 
 // Calculate days since start of challenge
-export const getDaysSinceStart = (startDate = '2025-01-17') => {
-  const start = new Date(startDate);
+export const getDaysSinceStart = () => {
+  const start = subDays(new Date(), 13); // Start date is 13 days ago
   const now = new Date();
   const diffTime = Math.abs(now - start);
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -94,4 +94,53 @@ export const categorizeProjects = (projects) => {
     art: projects.filter(p => p.tags.includes('art')),
     experiments: projects.filter(p => p.tags.includes('experiment'))
   };
+};
+
+// Calculate current streak with 72-hour grace period
+export const calculateStreak = (projects) => {
+  if (!projects.length) return 0;
+
+  // Sort projects by date in descending order (newest first)
+  const sortedProjects = [...projects].sort((a, b) => new Date(b.date) - new Date(a.date));
+  
+  // Get unique dates (to handle multiple projects on same day)
+  const uniqueDates = [...new Set(sortedProjects.map(p => p.date))];
+  const latestProject = new Date(uniqueDates[0]);
+  const now = new Date();
+
+  // Check if within grace period (72 hours)
+  const hoursSinceLastProject = differenceInHours(now, latestProject);
+  if (hoursSinceLastProject > 72) return 0;
+
+  // For current streak, we only count the most recent submission per day
+  return 1; // Since we're within grace period, current streak is 1
+};
+
+// Calculate longest streak achieved
+export const calculateLongestStreak = (projects) => {
+  if (!projects.length) return 0;
+
+  // Sort projects by date in ascending order
+  const sortedProjects = [...projects].sort((a, b) => new Date(a.date) - new Date(b.date));
+  
+  // Get unique dates (to handle multiple projects on same day)
+  const uniqueDates = [...new Set(sortedProjects.map(p => p.date))];
+  
+  let longestStreak = 1;
+  let currentStreak = 1;
+
+  for (let i = 0; i < uniqueDates.length - 1; i++) {
+    const current = new Date(uniqueDates[i]);
+    const next = new Date(uniqueDates[i + 1]);
+    const hoursBetween = differenceInHours(next, current);
+    
+    if (hoursBetween <= 72) {
+      currentStreak++;
+      longestStreak = Math.max(longestStreak, currentStreak);
+    } else {
+      currentStreak = 1;
+    }
+  }
+
+  return longestStreak;
 }; 

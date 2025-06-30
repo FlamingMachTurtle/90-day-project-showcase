@@ -194,17 +194,17 @@ export default function Home() {
                 <h4 className="text-lg font-semibold mb-4">Categories</h4>
                 <ul className="space-y-2 text-gray-400">
                   <li><a href="/games" className="hover:text-white">Games</a></li>
-                  <li><a href="#" className="hover:text-white">Data Visualization</a></li>
-                  <li><a href="#" className="hover:text-white">Utilities</a></li>
-                  <li><a href="#" className="hover:text-white">Art & Creative</a></li>
+                  <li><a href="#" className="hover:text-white">Data Visualization <span className="text-xs text-blue-400">Coming Soon</span></a></li>
+                  <li><a href="#" className="hover:text-white">Utilities <span className="text-xs text-blue-400">Coming Soon</span></a></li>
+                  <li><a href="#" className="hover:text-white">Art & Creative <span className="text-xs text-blue-400">Coming Soon</span></a></li>
                 </ul>
               </div>
               <div>
                 <h4 className="text-lg font-semibold mb-4">Connect</h4>
                 <ul className="space-y-2 text-gray-400">
-                  <li><a href="#" className="hover:text-white">GitHub</a></li>
-                  <li><a href="#" className="hover:text-white">Twitter</a></li>
-                  <li><a href="#" className="hover:text-white">LinkedIn</a></li>
+                  <li><a href="#" className="hover:text-white">GitHub <span className="text-xs text-blue-400">Coming Soon</span></a></li>
+                  <li><a href="#" className="hover:text-white">Twitter <span className="text-xs text-blue-400">Coming Soon</span></a></li>
+                  <li><a href="#" className="hover:text-white">LinkedIn <span className="text-xs text-blue-400">Coming Soon</span></a></li>
                   <li><a href="/about" className="hover:text-white">About</a></li>
                 </ul>
               </div>

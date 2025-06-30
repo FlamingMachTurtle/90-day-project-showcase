@@ -13,4 +13,17 @@ export default function LogoutButton() {
       Logout
     </button>
   );
+}
+
+export function CompactLogoutButton() {
+  const { logout } = useAuth();
+
+  return (
+    <button
+      onClick={logout}
+      className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded transition-colors duration-200"
+    >
+      Logout
+    </button>
+  );
 } 
