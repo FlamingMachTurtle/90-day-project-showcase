@@ -24,21 +24,6 @@
             border-radius: 8px;
             z-index: 1000;
         }
-        #back-link {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 10px 20px;
-            text-decoration: none;
-            border-radius: 5px;
-            z-index: 1000;
-            transition: background 0.3s;
-        }
-        #back-link:hover {
-            background: rgba(0, 0, 0, 0.9);
-        }
         .slider-container {
             margin: 10px 0;
         }
@@ -49,29 +34,45 @@
         input[type="range"] {
             width: 200px;
         }
+        #back-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 1000;
+            text-decoration: none;
+        }
+        #back-button:hover {
+            background: rgba(0, 0, 0, 0.9);
+        }
     </style>
 </head>
 <body>
     <div id="controls">
-        <h3>Particle Controls</h3>
         <div class="slider-container">
-            <label for="particleCount">Particle Count</label>
+            <label for="particleCount">Particle Count: <span id="particleCountValue">500</span></label>
             <input type="range" id="particleCount" min="100" max="2000" value="500">
         </div>
         <div class="slider-container">
-            <label for="speed">Speed</label>
-            <input type="range" id="speed" min="0.1" max="2" value="1" step="0.1">
+            <label for="particleSize">Particle Size: <span id="particleSizeValue">3</span></label>
+            <input type="range" id="particleSize" min="1" max="10" value="3">
         </div>
         <div class="slider-container">
-            <label for="size">Particle Size</label>
-            <input type="range" id="size" min="1" max="10" value="3" step="0.5">
+            <label for="particleSpeed">Speed: <span id="particleSpeedValue">1</span>x</label>
+            <input type="range" id="particleSpeed" min="0.1" max="2" value="1" step="0.1">
         </div>
     </div>
-    <a href="javascript:history.back()" id="back-link">← Back to Portfolio</a>
+    <a href="/" id="back-button">Back to Portfolio</a>
     <script>
         let scene, camera, renderer, particles;
         let mouseX = 0, mouseY = 0;
-        
+        let isMouseDown = false;
+
         // Initialize Three.js scene
         function init() {
             scene = new THREE.Scene();
@@ -79,111 +80,138 @@
             renderer = new THREE.WebGLRenderer();
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.body.appendChild(renderer.domElement);
-            
+
             // Create particles
-            createParticles(500);
-            
+            createParticles();
+
+            // Set camera position
             camera.position.z = 50;
-            
-            // Event listeners
+
+            // Add event listeners
             document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mousedown', () => isMouseDown = true);
+            document.addEventListener('mouseup', () => isMouseDown = false);
             window.addEventListener('resize', onWindowResize);
-            
-            // Control listeners
+
+            // Add control listeners
             document.getElementById('particleCount').addEventListener('input', updateParticleCount);
-            document.getElementById('speed').addEventListener('input', updateSpeed);
-            document.getElementById('size').addEventListener('input', updateSize);
-            
-            animate();
+            document.getElementById('particleSize').addEventListener('input', updateParticleSize);
+            document.getElementById('particleSpeed').addEventListener('input', updateParticleSpeed);
         }
-        
-        function createParticles(count) {
-            if (particles) scene.remove(particles);
-            
+
+        function createParticles() {
             const geometry = new THREE.BufferGeometry();
+            const count = parseInt(document.getElementById('particleCount').value);
             const positions = new Float32Array(count * 3);
             const velocities = new Float32Array(count * 3);
-            
+
             for (let i = 0; i < count * 3; i += 3) {
-                positions[i] = (Math.random() - 0.5) * 100;
-                positions[i + 1] = (Math.random() - 0.5) * 100;
-                positions[i + 2] = (Math.random() - 0.5) * 100;
+                // Random positions in a sphere
+                const radius = Math.random() * 30;
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.acos(Math.random() * 2 - 1);
                 
-                velocities[i] = (Math.random() - 0.5) * 0.2;
-                velocities[i + 1] = (Math.random() - 0.5) * 0.2;
-                velocities[i + 2] = (Math.random() - 0.5) * 0.2;
+                positions[i] = radius * Math.sin(phi) * Math.cos(theta);
+                positions[i + 1] = radius * Math.sin(phi) * Math.sin(theta);
+                positions[i + 2] = radius * Math.cos(phi);
+
+                // Random initial velocities
+                velocities[i] = (Math.random() - 0.5) * 0.1;
+                velocities[i + 1] = (Math.random() - 0.5) * 0.1;
+                velocities[i + 2] = (Math.random() - 0.5) * 0.1;
             }
-            
+
             geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
             geometry.setAttribute('velocity', new THREE.BufferAttribute(velocities, 3));
-            
+
             const material = new THREE.PointsMaterial({
-                size: 3,
+                size: parseFloat(document.getElementById('particleSize').value),
                 color: 0xffffff,
                 transparent: true,
                 opacity: 0.8,
                 blending: THREE.AdditiveBlending
             });
-            
+
+            if (particles) scene.remove(particles);
             particles = new THREE.Points(geometry, material);
             scene.add(particles);
         }
-        
-        function animate() {
-            requestAnimationFrame(animate);
-            
-            const positions = particles.geometry.attributes.position.array;
-            const velocities = particles.geometry.attributes.velocity.array;
-            const speed = parseFloat(document.getElementById('speed').value);
-            
-            for (let i = 0; i < positions.length; i += 3) {
-                positions[i] += velocities[i] * speed;
-                positions[i + 1] += velocities[i + 1] * speed;
-                positions[i + 2] += velocities[i + 2] * speed;
-                
-                // Boundary check and bounce
-                for (let j = 0; j < 3; j++) {
-                    if (Math.abs(positions[i + j]) > 50) {
-                        positions[i + j] = Math.sign(positions[i + j]) * 50;
-                        velocities[i + j] *= -1;
-                    }
-                }
-            }
-            
-            particles.geometry.attributes.position.needsUpdate = true;
-            
-            // Rotate based on mouse position
-            particles.rotation.x += mouseY * 0.0005;
-            particles.rotation.y += mouseX * 0.0005;
-            
-            renderer.render(scene, camera);
-        }
-        
+
         function onMouseMove(event) {
-            mouseX = event.clientX - window.innerWidth / 2;
-            mouseY = event.clientY - window.innerHeight / 2;
+            if (!isMouseDown) {
+                mouseX = (event.clientX - window.innerWidth / 2) * 0.001;
+                mouseY = (event.clientY - window.innerHeight / 2) * 0.001;
+            }
         }
-        
+
         function onWindowResize() {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         }
-        
+
         function updateParticleCount(event) {
-            createParticles(parseInt(event.target.value));
+            document.getElementById('particleCountValue').textContent = event.target.value;
+            createParticles();
         }
-        
-        function updateSpeed(event) {
-            // Speed is handled in animate()
+
+        function updateParticleSize(event) {
+            document.getElementById('particleSizeValue').textContent = event.target.value;
+            if (particles) {
+                particles.material.size = parseFloat(event.target.value);
+            }
         }
-        
-        function updateSize(event) {
-            particles.material.size = parseFloat(event.target.value);
+
+        function updateParticleSpeed(event) {
+            document.getElementById('particleSpeedValue').textContent = event.target.value;
         }
-        
-        // Start the simulation
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (particles) {
+                const positions = particles.geometry.attributes.position.array;
+                const velocities = particles.geometry.attributes.velocity.array;
+                const speed = parseFloat(document.getElementById('particleSpeed').value);
+
+                for (let i = 0; i < positions.length; i += 3) {
+                    // Update positions based on velocities
+                    positions[i] += velocities[i] * speed;
+                    positions[i + 1] += velocities[i + 1] * speed;
+                    positions[i + 2] += velocities[i + 2] * speed;
+
+                    // Boundary check and bounce
+                    const bounds = 40;
+                    for (let j = 0; j < 3; j++) {
+                        if (Math.abs(positions[i + j]) > bounds) {
+                            positions[i + j] = Math.sign(positions[i + j]) * bounds;
+                            velocities[i + j] *= -0.8; // Bounce with energy loss
+                        }
+                    }
+
+                    // Mouse interaction only when clicked
+                    if (isMouseDown) {
+                        const mouseForce = 0.01;
+                        velocities[i] += mouseX * mouseForce;
+                        velocities[i + 1] -= mouseY * mouseForce;
+                    }
+                }
+
+                particles.geometry.attributes.position.needsUpdate = true;
+                particles.geometry.attributes.velocity.needsUpdate = true;
+
+                // Gentle hover rotation
+                if (!isMouseDown) {
+                    particles.rotation.y += mouseX * 0.01;
+                    particles.rotation.x += mouseY * 0.01;
+                }
+            }
+
+            renderer.render(scene, camera);
+        }
+
         init();
+        animate();
     </script>
 </body>
 </html> 
