@@ -10,7 +10,7 @@ This is a **living showcase** that grows daily with new interactive projects. Th
 - **Projects Completed**: 3/90
 - **Current Day**: 3
 - **Technologies Used**: 15+
-- **Total Hours**: 400+
+- **Total Hours**: 20+
 
 ## ✨ Features
 
