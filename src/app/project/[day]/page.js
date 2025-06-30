@@ -7,8 +7,10 @@ import { formatDate, getRelativeTime } from '@/lib/utils';
 import ProjectDemo from '@/components/ProjectDemo';
 import { CompactLogoutButton } from '@/components/LogoutButton';
 import projectsData from '@/data/projects.json';
+import { useRouter } from 'next/navigation';
 
 export default function ProjectPage({ params }) {
+  const router = useRouter();
   const [project, setProject] = useState(null);
   const [relatedProjects, setRelatedProjects] = useState([]);
   const [prevProject, setPrevProject] = useState(null);
@@ -18,9 +20,7 @@ export default function ProjectPage({ params }) {
   useEffect(() => {
     const loadProject = async () => {
       try {
-        // Unwrap the async params
-        const resolvedParams = await params;
-        const day = parseInt(resolvedParams.day);
+        const day = parseInt(params.day);
         const currentProject = projectsData.find(p => p.day === day);
         
         if (currentProject) {
@@ -40,17 +40,22 @@ export default function ProjectPage({ params }) {
           const next = projectsData.find(p => p.day === day + 1);
           setPrevProject(prev);
           setNextProject(next);
+        } else {
+          // If project not found, redirect to home
+          router.push('/');
         }
         
         setIsLoading(false);
       } catch (error) {
         console.error('Error loading project:', error);
         setIsLoading(false);
+        // On error, redirect to home
+        router.push('/');
       }
     };
     
     loadProject();
-  }, [params]);
+  }, [params.day, router]);
 
   if (isLoading) {
     return (
