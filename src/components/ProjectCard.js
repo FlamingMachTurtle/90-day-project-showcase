@@ -2,20 +2,17 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { formatDate } from '@/lib/utils';
 import { motion } from 'framer-motion';
+import { useRouter } from 'next/router';
 
 const ProjectCard = ({ project }) => {
+  const router = useRouter();
   const { day, title, date, tags, technologies, description, thumbnail, featured, githubUrl, liveDemo, externalDemo } = project;
   const defaultThumbnail = `/projects/default-project.svg`;
   const projectThumbnail = thumbnail || `/thumbnails/day${day}.svg`;
-  const demoUrl = externalDemo || `/project/${day}`;
 
   const handleCardClick = () => {
     if (liveDemo) {
-      if (externalDemo) {
-        window.open(externalDemo, '_blank', 'noopener,noreferrer');
-      } else {
-        window.location.href = `/project/${day}`;
-      }
+      router.push(`/project/${day}`);
     }
   };
 
@@ -114,17 +111,15 @@ const ProjectCard = ({ project }) => {
               </a>
             )}
             {liveDemo && (
-              <a
-                href={demoUrl}
-                target={externalDemo ? "_blank" : "_self"}
-                rel={externalDemo ? "noopener noreferrer" : undefined}
+              <Link
+                href={`/project/${day}`}
                 className="text-sm px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 flex items-center gap-1.5"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                 </svg>
-                {externalDemo ? 'Open Demo' : 'Live Demo'}
-              </a>
+                Live Demo
+              </Link>
             )}
           </div>
         </div>
