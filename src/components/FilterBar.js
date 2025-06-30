@@ -1,69 +1,61 @@
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState } from 'react';
+import { motion } from 'framer-motion';
 
-const FilterBar = ({ 
-  projects, 
-  onFilterChange, 
-  availableTags, 
-  availableTechnologies 
-}) => {
+const FilterBar = ({ onFilterChange }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedTags, setSelectedTags] = useState([]);
-  const [selectedTechnologies, setSelectedTechnologies] = useState([]);
   const [sortBy, setSortBy] = useState('day-desc');
   const [showFilters, setShowFilters] = useState(false);
-
-  // Update parent component when filters change
-  useEffect(() => {
-    onFilterChange({
-      search: searchTerm,
-      tags: selectedTags,
-      technologies: selectedTechnologies,
-      sortBy
-    });
-  }, [searchTerm, selectedTags, selectedTechnologies, sortBy, onFilterChange]);
+  const [selectedTags, setSelectedTags] = useState([]);
+  const [selectedTech, setSelectedTech] = useState([]);
 
   const handleTagToggle = (tag) => {
-    setSelectedTags(prev => 
-      prev.includes(tag) 
+    setSelectedTags(prev => {
+      const newTags = prev.includes(tag)
         ? prev.filter(t => t !== tag)
-        : [...prev, tag]
-    );
+        : [...prev, tag];
+      onFilterChange({ searchTerm, sortBy, tags: newTags, tech: selectedTech });
+      return newTags;
+    });
   };
 
-  const handleTechnologyToggle = (tech) => {
-    setSelectedTechnologies(prev => 
-      prev.includes(tech) 
+  const handleTechToggle = (tech) => {
+    setSelectedTech(prev => {
+      const newTech = prev.includes(tech)
         ? prev.filter(t => t !== tech)
-        : [...prev, tech]
-    );
+        : [...prev, tech];
+      onFilterChange({ searchTerm, sortBy, tags: selectedTags, tech: newTech });
+      return newTech;
+    });
   };
 
-  const clearAllFilters = () => {
-    setSearchTerm('');
-    setSelectedTags([]);
-    setSelectedTechnologies([]);
-    setSortBy('day-desc');
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    onFilterChange({ searchTerm: value, sortBy, tags: selectedTags, tech: selectedTech });
   };
 
-  const hasActiveFilters = searchTerm || selectedTags.length > 0 || selectedTechnologies.length > 0;
+  const handleSortChange = (e) => {
+    const value = e.target.value;
+    setSortBy(value);
+    onFilterChange({ searchTerm, sortBy: value, tags: selectedTags, tech: selectedTech });
+  };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 mb-6">
       {/* Main Filter Bar */}
-      <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center">
+      <div className="flex flex-col lg:flex-row gap-3 items-start lg:items-center">
         {/* Search Input */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 w-full">
           <div className="relative">
             <input
               type="text"
-              placeholder="Search projects..."
+              placeholder="Search projects by title, description, or technology..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              onChange={handleSearchChange}
+              className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-400 transition-colors duration-200 text-gray-900 placeholder-gray-600"
             />
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </div>
@@ -71,105 +63,86 @@ const FilterBar = ({
         </div>
 
         {/* Sort Dropdown */}
-        <div className="flex-shrink-0">
+        <div className="flex-shrink-0 w-full lg:w-auto">
           <select
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            onChange={handleSortChange}
+            className="w-full lg:w-auto bg-white border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-400 transition-colors duration-200 text-gray-900"
           >
-            <option value="day-desc">Latest Day</option>
-            <option value="day-asc">Earliest Day</option>
-            <option value="newest">Newest Date</option>
-            <option value="oldest">Oldest Date</option>
-            <option value="featured">Featured First</option>
+            <option value="day-desc">Latest Day First</option>
+            <option value="day-asc">Earliest Day First</option>
+            <option value="newest">Newest Date First</option>
+            <option value="oldest">Oldest Date First</option>
+            <option value="featured">Featured Projects First</option>
           </select>
         </div>
 
         {/* Filter Toggle Button */}
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-            showFilters || hasActiveFilters
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-          }`}
+          className="flex-shrink-0 inline-flex items-center gap-2 px-4 py-2.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg text-gray-700 transition-colors duration-200"
         >
-          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z" />
+          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
           </svg>
           Filters
-          {hasActiveFilters && (
-            <span className="bg-white bg-opacity-20 text-xs px-2 py-0.5 rounded-full">
-              {(selectedTags.length + selectedTechnologies.length + (searchTerm ? 1 : 0))}
-            </span>
-          )}
+          <span className="bg-gray-200 text-gray-800 px-2 py-0.5 rounded-full text-xs font-medium">
+            {selectedTags.length + selectedTech.length}
+          </span>
         </button>
-
-        {/* Clear Filters */}
-        {hasActiveFilters && (
-          <button
-            onClick={clearAllFilters}
-            className="text-gray-500 hover:text-gray-700 text-sm font-medium"
-          >
-            Clear All
-          </button>
-        )}
       </div>
 
-      {/* Expandable Filter Options */}
-      <AnimatePresence>
+      {/* Expanded Filters */}
+      <motion.div
+        initial={false}
+        animate={{ height: showFilters ? 'auto' : 0, opacity: showFilters ? 1 : 0 }}
+        transition={{ duration: 0.2 }}
+        className="overflow-hidden"
+      >
         {showFilters && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="overflow-hidden"
-          >
-            <div className="pt-6 space-y-6">
-              {/* Tags Filter */}
-              <div>
-                <h4 className="text-sm font-medium text-gray-900 mb-3">Tags</h4>
-                <div className="flex flex-wrap gap-2">
-                  {availableTags.map((tag) => (
-                    <button
-                      key={tag}
-                      onClick={() => handleTagToggle(tag)}
-                      className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                        selectedTags.includes(tag)
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
-                    >
-                      #{tag}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Technologies Filter */}
-              <div>
-                <h4 className="text-sm font-medium text-gray-900 mb-3">Technologies</h4>
-                <div className="flex flex-wrap gap-2">
-                  {availableTechnologies.map((tech) => (
-                    <button
-                      key={tech}
-                      onClick={() => handleTechnologyToggle(tech)}
-                      className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
-                        selectedTechnologies.includes(tech)
-                          ? 'bg-green-600 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
-                    >
-                      {tech}
-                    </button>
-                  ))}
-                </div>
+          <div className="mt-4 pt-4 border-t border-gray-100">
+            {/* Project Types */}
+            <div className="mb-4">
+              <h3 className="text-sm font-medium text-gray-700 mb-2">Project Types</h3>
+              <div className="flex flex-wrap gap-2">
+                {['game', 'visualization', 'tool', 'api', 'interactive'].map(tag => (
+                  <button
+                    key={tag}
+                    onClick={() => handleTagToggle(tag)}
+                    className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors duration-200 ${
+                      selectedTags.includes(tag)
+                        ? 'bg-blue-100 text-blue-700'
+                        : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                    }`}
+                  >
+                    #{tag}
+                  </button>
+                ))}
               </div>
             </div>
-          </motion.div>
+
+            {/* Technologies */}
+            <div>
+              <h3 className="text-sm font-medium text-gray-700 mb-2">Technologies</h3>
+              <div className="flex flex-wrap gap-2">
+                {['JavaScript', 'React', 'Three.js', 'Canvas', 'WebGL', 'API'].map(tech => (
+                  <button
+                    key={tech}
+                    onClick={() => handleTechToggle(tech)}
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                      selectedTech.includes(tech)
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                    }`}
+                  >
+                    {tech}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
         )}
-      </AnimatePresence>
+      </motion.div>
     </div>
   );
 };
