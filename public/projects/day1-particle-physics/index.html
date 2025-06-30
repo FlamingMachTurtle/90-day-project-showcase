@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Particle Physics Simulation</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            display: block;
+        }
+        #controls {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            z-index: 1000;
+        }
+        #back-link {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            z-index: 1000;
+            transition: background 0.3s;
+        }
+        #back-link:hover {
+            background: rgba(0, 0, 0, 0.9);
+        }
+        .slider-container {
+            margin: 10px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="range"] {
+            width: 200px;
+        }
+    </style>
+</head>
+<body>
+    <div id="controls">
+        <h3>Particle Controls</h3>
+        <div class="slider-container">
+            <label for="particleCount">Particle Count</label>
+            <input type="range" id="particleCount" min="100" max="2000" value="500">
+        </div>
+        <div class="slider-container">
+            <label for="speed">Speed</label>
+            <input type="range" id="speed" min="0.1" max="2" value="1" step="0.1">
+        </div>
+        <div class="slider-container">
+            <label for="size">Particle Size</label>
+            <input type="range" id="size" min="1" max="10" value="3" step="0.5">
+        </div>
+    </div>
+    <a href="javascript:history.back()" id="back-link">← Back to Portfolio</a>
+    <script>
+        let scene, camera, renderer, particles;
+        let mouseX = 0, mouseY = 0;
+        
+        // Initialize Three.js scene
+        function init() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+            
+            // Create particles
+            createParticles(500);
+            
+            camera.position.z = 50;
+            
+            // Event listeners
+            document.addEventListener('mousemove', onMouseMove);
+            window.addEventListener('resize', onWindowResize);
+            
+            // Control listeners
+            document.getElementById('particleCount').addEventListener('input', updateParticleCount);
+            document.getElementById('speed').addEventListener('input', updateSpeed);
+            document.getElementById('size').addEventListener('input', updateSize);
+            
+            animate();
+        }
+        
+        function createParticles(count) {
+            if (particles) scene.remove(particles);
+            
+            const geometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(count * 3);
+            const velocities = new Float32Array(count * 3);
+            
+            for (let i = 0; i < count * 3; i += 3) {
+                positions[i] = (Math.random() - 0.5) * 100;
+                positions[i + 1] = (Math.random() - 0.5) * 100;
+                positions[i + 2] = (Math.random() - 0.5) * 100;
+                
+                velocities[i] = (Math.random() - 0.5) * 0.2;
+                velocities[i + 1] = (Math.random() - 0.5) * 0.2;
+                velocities[i + 2] = (Math.random() - 0.5) * 0.2;
+            }
+            
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geometry.setAttribute('velocity', new THREE.BufferAttribute(velocities, 3));
+            
+            const material = new THREE.PointsMaterial({
+                size: 3,
+                color: 0xffffff,
+                transparent: true,
+                opacity: 0.8,
+                blending: THREE.AdditiveBlending
+            });
+            
+            particles = new THREE.Points(geometry, material);
+            scene.add(particles);
+        }
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            const positions = particles.geometry.attributes.position.array;
+            const velocities = particles.geometry.attributes.velocity.array;
+            const speed = parseFloat(document.getElementById('speed').value);
+            
+            for (let i = 0; i < positions.length; i += 3) {
+                positions[i] += velocities[i] * speed;
+                positions[i + 1] += velocities[i + 1] * speed;
+                positions[i + 2] += velocities[i + 2] * speed;
+                
+                // Boundary check and bounce
+                for (let j = 0; j < 3; j++) {
+                    if (Math.abs(positions[i + j]) > 50) {
+                        positions[i + j] = Math.sign(positions[i + j]) * 50;
+                        velocities[i + j] *= -1;
+                    }
+                }
+            }
+            
+            particles.geometry.attributes.position.needsUpdate = true;
+            
+            // Rotate based on mouse position
+            particles.rotation.x += mouseY * 0.0005;
+            particles.rotation.y += mouseX * 0.0005;
+            
+            renderer.render(scene, camera);
+        }
+        
+        function onMouseMove(event) {
+            mouseX = event.clientX - window.innerWidth / 2;
+            mouseY = event.clientY - window.innerHeight / 2;
+        }
+        
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+        
+        function updateParticleCount(event) {
+            createParticles(parseInt(event.target.value));
+        }
+        
+        function updateSpeed(event) {
+            // Speed is handled in animate()
+        }
+        
+        function updateSize(event) {
+            particles.material.size = parseFloat(event.target.value);
+        }
+        
+        // Start the simulation
+        init();
+    </script>
+</body>
+</html> 
