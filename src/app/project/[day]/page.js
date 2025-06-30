@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { formatDate, getRelativeTime } from '@/lib/utils';
 import ProjectDemo from '@/components/ProjectDemo';
+import { CompactLogoutButton } from '@/components/LogoutButton';
 import projectsData from '@/data/projects.json';
 
 export default function ProjectPage({ params }) {
@@ -109,7 +110,7 @@ export default function ProjectPage({ params }) {
                   Day {prevProject.day}
                 </Link>
               )}
-              <span className="text-gray-400">|</span>
+              {(prevProject || nextProject) && <span className="text-gray-400">|</span>}
               {nextProject && (
                 <Link 
                   href={`/project/${nextProject.day}`}
@@ -121,6 +122,8 @@ export default function ProjectPage({ params }) {
                   </svg>
                 </Link>
               )}
+              <span className="text-gray-400">|</span>
+              <CompactLogoutButton />
             </div>
           </div>
         </div>

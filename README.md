@@ -9,8 +9,9 @@ This is a **living showcase** that grows daily with new interactive projects. Th
 ### Current Status
 - **Projects Completed**: 3/90
 - **Current Day**: 3
-- **Technologies Used**: 15+
-- **Total Hours**: 20+
+- **Technologies Used**: 17+
+- **Total Hours**: 25+
+- **Security**: ✅ Password protected with smart rate limiting
 
 ## ✨ Features
 
@@ -21,6 +22,7 @@ This is a **living showcase** that grows daily with new interactive projects. Th
 - **Responsive Design**: Optimized for all devices and screen sizes
 - **Smooth Animations**: Powered by Framer Motion for engaging interactions
 - **"Surprise Me" Button**: Discover random projects with smooth scrolling highlight
+- **Secure Authentication**: Password protection with smart rate limiting and session management
 
 ### Project Categories
 - 🎮 **Games**: Interactive games and playable experiences
@@ -49,6 +51,14 @@ This is a **living showcase** that grows daily with new interactive projects. Th
 - **ESLint** - Code linting
 - **Prettier** - Code formatting
 - **Git** - Version control
+
+### Security Features
+- **Password Authentication** - Single password protection
+- **bcryptjs** - Secure password hashing
+- **iron-session** - Encrypted session management
+- **Smart Rate Limiting** - Progressive cooldowns (5min → 30min → 2hr → 24hr)
+- **Session Timeout** - Auto-logout after 24 hours
+- **Brute Force Protection** - IP-based attempt tracking
 
 ## 📁 Project Structure
 
@@ -101,13 +111,23 @@ my-90-day-showcase/
    npm install
    ```
 
-3. **Start development server**
+3. **Set up authentication**
+   Create a `.env.local` file in the project root:
+   ```bash
+   # Change these values for security!
+   AUTH_PASSWORD=your-secure-password-here
+   SESSION_SECRET=your-super-secret-session-key-at-least-32-characters-long
+   SESSION_TIMEOUT=86400000
+   ```
+
+4. **Start development server**
    ```bash
    npm run dev
    ```
 
-4. **Open your browser**
+5. **Open your browser**
    Navigate to `http://localhost:3000`
+   Enter your password from the `.env.local` file to access the portfolio
 
 ### Build for Production
 

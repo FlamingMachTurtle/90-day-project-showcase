@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import LogoutButton from '@/components/LogoutButton';
 
 export default function AboutPage() {
   return (
@@ -16,7 +17,7 @@ export default function AboutPage() {
               </svg>
               Back to Showcase
             </Link>
-            <nav className="hidden md:flex space-x-8">
+            <nav className="hidden md:flex items-center space-x-6">
               <a href="/" className="text-gray-700 hover:text-gray-900">
                 All Projects
               </a>
@@ -26,6 +27,9 @@ export default function AboutPage() {
               <a href="/about" className="text-blue-600 hover:text-blue-800 font-medium">
                 About
               </a>
+              <div className="ml-4 pl-4 border-l border-gray-300">
+                <LogoutButton className="text-sm" />
+              </div>
             </nav>
           </div>
         </div>

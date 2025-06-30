@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import ProjectCard from '@/components/ProjectCard';
+import LogoutButton from '@/components/LogoutButton';
 import { categorizeProjects } from '@/lib/utils';
 import projectsData from '@/data/projects.json';
 
@@ -27,7 +28,7 @@ export default function GamesPage() {
               </svg>
               Back to Showcase
             </Link>
-            <nav className="hidden md:flex space-x-8">
+            <nav className="hidden md:flex items-center space-x-6">
               <a href="/" className="text-gray-700 hover:text-gray-900">
                 All Projects
               </a>
@@ -37,6 +38,9 @@ export default function GamesPage() {
               <a href="/about" className="text-gray-700 hover:text-gray-900">
                 About
               </a>
+              <div className="ml-4 pl-4 border-l border-gray-300">
+                <LogoutButton className="text-sm" />
+              </div>
             </nav>
           </div>
         </div>

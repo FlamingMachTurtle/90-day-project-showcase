@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import ProjectCard from '@/components/ProjectCard';
 import FilterBar from '@/components/FilterBar';
 import ProgressTracker from '@/components/ProgressTracker';
+import LogoutButton from '@/components/LogoutButton';
 import { 
   filterProjects, 
   sortProjects, 
@@ -64,7 +65,7 @@ export default function Home() {
                 {projects.length}/90 Projects
               </span>
             </div>
-            <nav className="hidden md:flex space-x-8">
+            <nav className="hidden md:flex items-center space-x-6">
               <a href="/" className="text-blue-600 hover:text-blue-800 font-medium">
                 All Projects
               </a>
@@ -74,6 +75,9 @@ export default function Home() {
               <a href="/about" className="text-gray-700 hover:text-gray-900">
                 About
               </a>
+              <div className="ml-4 pl-4 border-l border-gray-300">
+                <LogoutButton className="text-sm" />
+              </div>
             </nav>
           </div>
         </div>
