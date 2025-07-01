@@ -275,6 +275,7 @@
         let gameSpeed = 300; // milliseconds
         let lastDirectionChange = 0;
         let directionChangeDelay = 100;
+        let inputBuffer = []; // Buffer for storing next valid move
         
         // Camera controls
         let cameraRadius = 12.5;
@@ -469,9 +470,63 @@
             return newFood;
         }
         
+        function isValidMove(currentDir, newDir) {
+            // Can't move in opposite direction
+            if (currentDir.x !== 0 && currentDir.x === -newDir.x) return false;
+            if (currentDir.y !== 0 && currentDir.y === -newDir.y) return false;
+            return true;
+        }
+        
+        function handleKeyPress(event) {
+            // Only handle game controls if game has started
+            if (!gameStarted) return;
+
+            // Calculate the new direction based on key press
+            let newDirection = { x: 0, y: 0, z: 0 };
+            
+            switch (event.code) {
+                case 'KeyW':
+                case 'ArrowUp':
+                    newDirection.x = 0;
+                    newDirection.y = 1;
+                    break;
+                case 'KeyS':
+                case 'ArrowDown':
+                    newDirection.x = 0;
+                    newDirection.y = -1;
+                    break;
+                case 'KeyA':
+                case 'ArrowLeft':
+                    newDirection.x = -1;
+                    newDirection.y = 0;
+                    break;
+                case 'KeyD':
+                case 'ArrowRight':
+                    newDirection.x = 1;
+                    newDirection.y = 0;
+                    break;
+                default:
+                    return; // Invalid key
+            }
+
+            // If it's a valid move relative to current direction, add it to buffer
+            if (isValidMove(direction, newDirection)) {
+                // Clear existing buffer and add new direction
+                inputBuffer = [newDirection];
+                event.preventDefault();
+            }
+        }
+        
         function updateGame() {
             if (!gameRunning) return;
             
+            // Process input buffer if there's a queued move
+            if (inputBuffer.length > 0 && isValidMove(direction, inputBuffer[0])) {
+                direction = inputBuffer[0];
+                inputBuffer = [];
+                updateUI();
+            }
+
             // Calculate next head position
             const head = { ...snake[0] };
             head.x += direction.x;
@@ -483,15 +538,14 @@
                 gameOver("Wall Collision!");
                 return;
             }
-            
+
             // Check self collision - only against segments that will remain after move
-            // Skip the last segment if we're not eating food, as it will move away
             const segmentsToCheck = snake.slice(0, -1); // Exclude the tail that will move
             if (segmentsToCheck.some(segment => segment.x === head.x && segment.y === head.y)) {
                 gameOver("You hit yourself!");
                 return;
             }
-            
+
             // Add new head
             snake.unshift(head);
             
@@ -609,73 +663,6 @@
             const zoomSpeed = 0.5;
             targetCameraRadius += event.deltaY * zoomSpeed * 0.01;
             targetCameraRadius = Math.max(minRadius, Math.min(maxRadius, targetCameraRadius));
-        }
-        
-        function handleKeyPress(event) {
-            // Only handle game controls if game has started
-            if (!gameStarted) return;
-            
-            const currentTime = Date.now();
-            if (currentTime - lastDirectionChange < directionChangeDelay) return;
-
-            // Get the actual current direction based on the snake's movement
-            const currentDirection = { ...direction };
-            
-            // Calculate the new direction based on key press
-            let newDirection = { x: 0, y: 0, z: 0 };
-            
-            switch (event.code) {
-                case 'KeyW':
-                case 'ArrowUp':
-                    // Can't go up if currently moving down
-                    if (currentDirection.y !== -1) {
-                        newDirection.x = 0;
-                        newDirection.y = 1;
-                    } else {
-                        return; // Invalid move
-                    }
-                    break;
-                case 'KeyS':
-                case 'ArrowDown':
-                    // Can't go down if currently moving up
-                    if (currentDirection.y !== 1) {
-                        newDirection.x = 0;
-                        newDirection.y = -1;
-                    } else {
-                        return; // Invalid move
-                    }
-                    break;
-                case 'KeyA':
-                case 'ArrowLeft':
-                    // Can't go left if currently moving right
-                    if (currentDirection.x !== 1) {
-                        newDirection.x = -1;
-                        newDirection.y = 0;
-                    } else {
-                        return; // Invalid move
-                    }
-                    break;
-                case 'KeyD':
-                case 'ArrowRight':
-                    // Can't go right if currently moving left
-                    if (currentDirection.x !== -1) {
-                        newDirection.x = 1;
-                        newDirection.y = 0;
-                    } else {
-                        return; // Invalid move
-                    }
-                    break;
-                default:
-                    return; // Invalid key
-            }
-            
-            // Only update if it's a valid direction change
-            if (newDirection.x !== 0 || newDirection.y !== 0) {
-                direction = newDirection;
-                lastDirectionChange = currentTime;
-                updateUI();
-                event.preventDefault();
-            }
         }
         
         function gameOver(reason) {
