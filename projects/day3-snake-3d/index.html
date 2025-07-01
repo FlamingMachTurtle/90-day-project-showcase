@@ -484,8 +484,10 @@
                 return;
             }
             
-            // Check self collision
-            if (snake.some(segment => segment.x === head.x && segment.y === head.y)) {
+            // Check self collision - only against segments that will remain after move
+            // Skip the last segment if we're not eating food, as it will move away
+            const segmentsToCheck = snake.slice(0, -1); // Exclude the tail that will move
+            if (segmentsToCheck.some(segment => segment.x === head.x && segment.y === head.y)) {
                 gameOver("You hit yourself!");
                 return;
             }
