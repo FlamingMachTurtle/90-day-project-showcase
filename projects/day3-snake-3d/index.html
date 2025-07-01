@@ -617,42 +617,60 @@
             
             const currentTime = Date.now();
             if (currentTime - lastDirectionChange < directionChangeDelay) return;
+
+            // Get the actual current direction based on the snake's movement
+            const currentDirection = { ...direction };
             
-            const newDirection = { ...direction };
+            // Calculate the new direction based on key press
+            let newDirection = { x: 0, y: 0, z: 0 };
             
             switch (event.code) {
                 case 'KeyW':
                 case 'ArrowUp':
-                    if (direction.y !== -1) {
+                    // Can't go up if currently moving down
+                    if (currentDirection.y !== -1) {
                         newDirection.x = 0;
                         newDirection.y = 1;
+                    } else {
+                        return; // Invalid move
                     }
                     break;
                 case 'KeyS':
                 case 'ArrowDown':
-                    if (direction.y !== 1) {
+                    // Can't go down if currently moving up
+                    if (currentDirection.y !== 1) {
                         newDirection.x = 0;
                         newDirection.y = -1;
+                    } else {
+                        return; // Invalid move
                     }
                     break;
                 case 'KeyA':
                 case 'ArrowLeft':
-                    if (direction.x !== 1) {
+                    // Can't go left if currently moving right
+                    if (currentDirection.x !== 1) {
                         newDirection.x = -1;
                         newDirection.y = 0;
+                    } else {
+                        return; // Invalid move
                     }
                     break;
                 case 'KeyD':
                 case 'ArrowRight':
-                    if (direction.x !== -1) {
+                    // Can't go right if currently moving left
+                    if (currentDirection.x !== -1) {
                         newDirection.x = 1;
                         newDirection.y = 0;
+                    } else {
+                        return; // Invalid move
                     }
                     break;
+                default:
+                    return; // Invalid key
             }
             
-            // Only update if direction actually changed
-            if (newDirection.x !== direction.x || newDirection.y !== direction.y) {
+            // Only update if it's a valid direction change
+            if (newDirection.x !== 0 || newDirection.y !== 0) {
                 direction = newDirection;
                 lastDirectionChange = currentTime;
                 updateUI();
