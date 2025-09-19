@@ -49,6 +49,27 @@ export function AuthProvider({ children }) {
     }
   };
 
+  // BYPASS_FEATURE: Temporary bypass for demo purposes
+  // This function can be easily removed to restore normal login flow
+  const bypassLogin = async () => {
+    try {
+      const res = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bypass: true })
+      });
+      const data = await res.json();
+      
+      if (data.success) {
+        setIsAuthenticated(true);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      return false;
+    }
+  };
+
   const logout = async () => {
     try {
       await fetch('/api/auth', { method: 'DELETE' });
@@ -66,7 +87,8 @@ export function AuthProvider({ children }) {
     <AuthContext.Provider value={{
       isAuthenticated,
       login,
-      logout
+      logout,
+      bypassLogin // BYPASS_FEATURE: Remove this line to disable bypass
     }}>
       {children}
     </AuthContext.Provider>
