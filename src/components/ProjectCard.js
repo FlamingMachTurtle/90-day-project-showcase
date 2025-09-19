@@ -11,19 +11,18 @@ const ProjectCard = ({ project }) => {
   const projectThumbnail = thumbnail || `/thumbnails/day${day}.svg`;
 
   return (
-    <Link href={`/project/${day}`} passHref>
-      <motion.div
-        whileHover={{ scale: 1.02, y: -4 }}
-        whileTap={{ scale: 0.98 }}
-        transition={{ duration: 0.2 }}
-        className={`relative bg-white rounded-xl shadow-sm hover:shadow-lg overflow-hidden border ${
-          featured ? 'border-blue-400/50 ring-2 ring-blue-100' : 'border-gray-100'
-        } transition-all duration-300`}
-        style={{ cursor: liveDemo ? 'pointer' : 'default' }}
-      >
-        <div className="group">
-          {/* Thumbnail */}
-          <div className="relative h-48 overflow-hidden">
+    <motion.div
+      whileHover={{ scale: 1.02, y: -4 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ duration: 0.2 }}
+      className={`relative bg-white rounded-xl shadow-sm hover:shadow-lg overflow-hidden border ${
+        featured ? 'border-blue-400/50 ring-2 ring-blue-100' : 'border-gray-100'
+      } transition-all duration-300`}
+    >
+      <div className="group">
+        {/* Thumbnail - clickable area */}
+        <Link href={`/project/${day}`}>
+          <div className="relative h-48 overflow-hidden cursor-pointer">
             <Image
               src={projectThumbnail}
               alt={title}
@@ -49,80 +48,86 @@ const ProjectCard = ({ project }) => {
               Day {day}
             </div>
           </div>
+        </Link>
 
-          {/* Content */}
-          <div className="p-4">
-            <div className="flex items-start justify-between mb-2">
-              <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-200">
-                {title}
-              </h3>
-              <span className="text-sm text-gray-500 ml-2 whitespace-nowrap">
-                {formatDate(date)}
-              </span>
-            </div>
-            
-            <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-              {description}
-            </p>
-
-            {/* Tags */}
-            <div className="flex flex-wrap gap-1.5 mb-2">
-              {tags?.map((tag, index) => (
-                <span
-                  key={index}
-                  className="px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full text-xs font-medium"
-                >
-                  {tag}
+        {/* Content */}
+        <div className="p-4">
+          <Link href={`/project/${day}`}>
+            <div className="cursor-pointer mb-3">
+              <div className="flex items-start justify-between mb-2">
+                <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-200">
+                  {title}
+                </h3>
+                <span className="text-sm text-gray-500 ml-2 whitespace-nowrap">
+                  {formatDate(date)}
                 </span>
-              ))}
-            </div>
+              </div>
+              
+              <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                {description}
+              </p>
 
-            {/* Technologies */}
-            <div className="flex flex-wrap gap-1.5 mb-3">
-              {technologies?.map((tech, index) => (
-                <span
-                  key={index}
-                  className="px-2 py-0.5 bg-purple-50 text-purple-600 rounded-full text-xs font-medium"
-                >
-                  {tech}
-                </span>
-              ))}
-            </div>
+              {/* Tags */}
+              <div className="flex flex-wrap gap-1.5 mb-2">
+                {tags?.map((tag, index) => (
+                  <span
+                    key={index}
+                    className="px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full text-xs font-medium"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
 
-            {/* Action Buttons */}
-            <div className="flex gap-2 mt-2" onClick={(e) => e.stopPropagation()}>
-              {githubUrl && (
-                <a
-                  href={githubUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors duration-200 flex items-center gap-1.5"
-                >
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" />
-                  </svg>
-                  View Source
-                </a>
-              )}
-              {liveDemo && (
-                <a
-                  href={externalDemo}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 flex items-center gap-1.5"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                  </svg>
-                  Live Demo
-                </a>
-              )}
+              {/* Technologies */}
+              <div className="flex flex-wrap gap-1.5">
+                {technologies?.map((tech, index) => (
+                  <span
+                    key={index}
+                    className="px-2 py-0.5 bg-purple-50 text-purple-600 rounded-full text-xs font-medium"
+                  >
+                    {tech}
+                  </span>
+                ))}
+              </div>
             </div>
+          </Link>
+
+          {/* Action Buttons - NOT nested in Link */}
+          <div className="flex gap-2 mt-2">
+            {githubUrl && (
+              <a
+                href={githubUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors duration-200 flex items-center gap-1.5"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" />
+                </svg>
+                View Source
+              </a>
+            )}
+            {liveDemo && (
+              <a
+                href={externalDemo}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 flex items-center gap-1.5"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+                Live Demo
+              </a>
+            )}
           </div>
         </div>
-      </motion.div>
-    </Link>
+      </div>
+    </motion.div>
   );
 };
 
-export default ProjectCard; 
+export default ProjectCard;
